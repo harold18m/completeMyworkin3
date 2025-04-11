@@ -6,18 +6,19 @@ import { useState } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 
 interface JobCategoryProps {
-  icon: string
-  title: string
-  bgColor: string
-  isExpanded?: boolean
-  children?: React.ReactNode
+  id: string;
+  icon: string;
+  title: string;
+  bgColor: string;
+  isExpanded?: boolean;
+  children?: React.ReactNode;
 }
 
-export default function JobCategory({ icon, title, bgColor, isExpanded = false, children }: JobCategoryProps) {
+export default function JobCategory({ id, icon, title, bgColor, isExpanded = false, children }: JobCategoryProps) {
   const [expanded, setExpanded] = useState(isExpanded)
 
   return (
-    <div className="mb-3">
+    <div id={id} className="mb-3 scroll-mt-4">
       <div
         className={`${bgColor} p-4 rounded-xl border border-amber-200 flex items-center justify-between cursor-pointer hover:shadow-md transition-all duration-300`}
         onClick={() => setExpanded(!expanded)}
@@ -38,10 +39,18 @@ export default function JobCategory({ icon, title, bgColor, isExpanded = false, 
 
       <div 
         className={`transition-all duration-300 overflow-hidden ${
-          expanded ? 'max-h-[2000px] opacity-100 mt-2' : 'max-h-0 opacity-0'
+          expanded ? 'max-h-[80vh] opacity-100 mt-2' : 'max-h-0 opacity-0'
         }`}
       >
-        {children}
+        <div 
+          className="overflow-y-auto max-h-[80vh] pr-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#D1D5DB #F3F4F6'
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   )

@@ -1,11 +1,13 @@
 import { Info } from "lucide-react"
 import JobCategory from "@/components/job-category"
 import JobListing from "@/components/job-listing"
-import { getLatestPracticesByCategory, Practice } from "@/services/firebase"
+import CategoryNav from "@/components/category-nav"
+import { getTodayPracticesByCategory, Practice } from "@/services/firebase"
+import Link from 'next/link'
 
-// Especificamos que este componente será renderizado en el servidor, pero con datos dinámicos
-export const dynamic = 'force-dynamic';
-export const revalidate = 3600; // Revalidar cada hora
+// Cambiamos a renderización estática para compatibilidad con exportación
+export const dynamic = 'force-static';
+export const revalidate = 3600; // Revalidar cada hora, pero esto solo funciona con ISR, no con exportación estática
 
 interface CategoryData {
   icon: string;
@@ -13,49 +15,23 @@ interface CategoryData {
   practices: Practice[];
 }
 
-// Iconos y colores para cada categoría
-const categoryConfig: Record<string, { icon: string; bgColor: string }> = {
-  'Comercial y ventas': { 
-    icon: '💼', 
-    bgColor: 'bg-amber-50' 
-  },
-  'Operaciones, cadena y proyectos': { 
-    icon: '✈️', 
-    bgColor: 'bg-indigo-50' 
-  },
-  'Marketing y comunicaciones': { 
-    icon: '📊', 
-    bgColor: 'bg-amber-50' 
-  },
-  'Capital humano': { 
-    icon: '👨‍💼', 
-    bgColor: 'bg-indigo-50' 
-  },
-  'Administración, economía y finanzas': { 
-    icon: '📝', 
-    bgColor: 'bg-amber-50' 
-  },
-  'Tecnología e innovación': { 
-    icon: '💻', 
-    bgColor: 'bg-amber-50' 
-  },
-  'Legal y derecho': { 
-    icon: '⚖️', 
-    bgColor: 'bg-amber-50' 
-  },
-  'Ingeniería Civil y Arquitectura': { 
-    icon: '🏗️', 
-    bgColor: 'bg-indigo-50' 
-  },
-  'Otros': { 
-    icon: '🔍', 
-    bgColor: 'bg-gray-50' 
-  }
+// Iconos para las categorías
+const categoryIcons: Record<string, string> = {
+  'Ingeniería Industrial y Mecánica': '🔧',
+  'Ingeniería Civil y Arquitectura': '🏗️',
+  'Tecnología e innovación': '💻',
+  'Administración, economía y finanzas': '📊',
+  'Comercial y ventas': '💼',
+  'Operaciones, cadena y proyectos': '📦',
+  'Marketing y comunicaciones': '📱',
+  'Capital humano': '👥',
+  'Legal y derecho': '⚖️',
+  'Otros': '🔍'
 };
 
 export default async function Home() {
-  // Obtener datos clasificados desde Firebase
-  const { extractionDate, practices: practicesByCategory } = await getLatestPracticesByCategory();
+  // Obtener datos clasificados desde Firebase usando la nueva función
+  const { extractionDate, practices: practicesByCategory } = await getTodayPracticesByCategory();
   
   // Formatear la fecha de extracción
   const formattedDate = extractionDate 
@@ -66,13 +42,23 @@ export default async function Home() {
       })
     : 'No disponible';
 
+  // Preparar las categorías para el menú de navegación
+  const navigationCategories = Object.entries(practicesByCategory)
+    .map(([name, practices]) => ({
+      id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name,
+      count: practices.length,
+      icon: categoryIcons[name] || '📋'
+    }))
+    .sort((a, b) => b.count - a.count); // Ordenar por cantidad de prácticas
+
   // Crear un objeto con todas las categorías configuradas y sus prácticas
   const categoriesData: Record<string, CategoryData> = {};
   
-  Object.entries(categoryConfig).forEach(([category, config]) => {
+  Object.entries(categoryIcons).forEach(([category, icon]) => {
     categoriesData[category] = {
-      icon: config.icon,
-      bgColor: config.bgColor,
+      icon: icon,
+      bgColor: category === 'Otros' ? 'bg-gray-50' : 'bg-amber-50',
       practices: practicesByCategory[category] || []
     };
   });
@@ -107,7 +93,7 @@ export default async function Home() {
             </div>
             
             <a 
-              href="https://api.whatsapp.com/send/?phone=+51966384746&text&type=phone_number&app_absent=0"
+              href="https://mc.ht/s/SH1lIgc"
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-medium shadow-md hover:shadow-lg transition-all text-sm"
@@ -141,7 +127,7 @@ export default async function Home() {
           </p>
         </div>
 
-        {/* Compactar estos elementos en una línea */}
+        {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {/* Info Card con fecha de actualización */}
           <div className="bg-white p-3 rounded-xl shadow-md flex items-center gap-3 border border-indigo-100">
@@ -153,7 +139,7 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* Proceso de Aplicación - más compacto */}
+          {/* Proceso de Aplicación */}
           <div className="bg-white p-3 rounded-xl shadow-md border border-indigo-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -178,7 +164,10 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* Categorías de Prácticas - DESTACADO */}
+        {/* Menú de navegación por categorías */}
+        <CategoryNav categories={navigationCategories} />
+
+        {/* Categorías de Prácticas */}
         <section className="mb-6">
           <h2 className="text-lg font-bold mb-3 text-gray-800 flex items-center">
             <span className="bg-indigo-600 text-white h-7 w-7 rounded-full flex items-center justify-center mr-2 shadow-md">2</span>
@@ -189,17 +178,16 @@ export default async function Home() {
           </h2>
 
           <div className="space-y-3">
-            {Object.entries(categoriesData).map(([category, data]) => (
-              // Solo mostrar categorías con prácticas disponibles
-              data.practices.length > 0 ? (
+            {Object.entries(practicesByCategory).map(([category, practices]) => (
+              practices.length > 0 ? (
                 <JobCategory 
-                  key={category} 
-                  icon={data.icon} 
-                  title={`${category} (${data.practices.length})`} 
-                  bgColor={data.bgColor}
-                  isExpanded={category === 'Comercial y ventas' || category === 'Administración, economía y finanzas'}
+                  key={category}
+                  id={category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
+                  icon={categoryIcons[category] || '📋'}
+                  title={`${category} (${practices.length})`}
+                  bgColor={category === 'Otros' ? 'bg-gray-50' : 'bg-amber-50'}
                 >
-                  {renderPractices(data.practices)}
+                  {renderPractices(practices)}
                 </JobCategory>
               ) : null
             ))}
@@ -252,8 +240,13 @@ export default async function Home() {
       {/* Footer simplificado */}
       <footer className="bg-white border-t border-gray-200 py-3 mt-4">
         <div className="container mx-auto px-4">
-          <div className="flex justify-center items-center">
-            <p className="text-gray-600 text-xs">© 2025 MyWorkIn. Todos los derechos reservados.</p>
+          <div className="flex flex-col justify-center items-center">
+            <p className="text-gray-600 text-xs mb-2">© 2025 MyWorkIn. Todos los derechos reservados.</p>
+            <div className="flex justify-center space-x-4 text-xs text-indigo-600">
+              <Link href="/terminos-condiciones" className="hover:text-indigo-800 transition-colors">Términos y Condiciones</Link>
+              <Link href="/politica-privacidad" className="hover:text-indigo-800 transition-colors">Política de Privacidad</Link>
+              <Link href="/politica-reembolsos" className="hover:text-indigo-800 transition-colors">Política de Reembolsos</Link>
+            </div>
           </div>
         </div>
       </footer>

@@ -21,6 +21,8 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // Configuración para exportación estática (cPanel)
+  output: 'export',
 }
 
 mergeConfig(nextConfig, userConfig)
