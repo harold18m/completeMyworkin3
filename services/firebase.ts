@@ -13,14 +13,16 @@ import { db } from '@/firebase/config';
 // Tipos de datos para las prácticas y categorías
 export interface Practice {
   id: string;
-  company: string;
   title: string;
-  requirements?: string;
+  company: string;
+  url: string;
   location?: string;
   salary?: string;
+  requirements?: string;
   end_date?: string;
-  url?: string;
-  category?: string; // Categoría asignada durante el procesamiento
+  posted_date?: string;
+  category: string;
+  source: string;
 }
 
 export interface ExtractedData {
@@ -133,6 +135,7 @@ export async function getLatestExtraction(): Promise<ExtractedData | null> {
 
 // Obtener todas las prácticas de una extracción y clasificarlas
 export async function getPractices(extractionId: string): Promise<{ [category: string]: Practice[] }> {
+  console.log('Obteniendo prácticas para extracción:', extractionId);
   try {
     const practicesRef = collection(db, `extractions/${extractionId}/practices`);
     const querySnapshot = await getDocs(practicesRef);
@@ -150,7 +153,8 @@ export async function getPractices(extractionId: string): Promise<{ [category: s
     querySnapshot.forEach((doc) => {
       const practice = {
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
+        posted_date: doc.data().extraction_date || new Date().toISOString().split('T')[0] // Usar la fecha de extracción como fecha de publicación
       } as Practice;
       
       // Asignar categoría
@@ -172,9 +176,10 @@ export async function getPractices(extractionId: string): Promise<{ [category: s
       }
     }
     
+    console.log('Prácticas encontradas:', Object.values(practicesByCategory).flat().length);
     return practicesByCategory;
   } catch (error) {
-    console.error('Error getting practices:', error);
+    console.error('Error al obtener prácticas:', error);
     return {};
   }
 }
@@ -199,34 +204,49 @@ export async function getLatestPracticesByCategory(): Promise<{
 
 // Obtener todas las extracciones del día actual
 export async function getTodayExtractions(): Promise<ExtractedData[]> {
+  console.log('Iniciando obtención de prácticas del día...');
+  
+  // Obtener la fecha actual en el formato "YYYY-MM-DD"
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  
+  const startOfDay = `${year}-${month}-${day} 00:00:00`;
+  const endOfDay = `${year}-${month}-${day} 23:59:59`;
+
+  console.log('Buscando extracciones entre:', {
+    startOfDay,
+    endOfDay
+  });
+
   try {
-    const extractionsRef = collection(db, 'extractions');
-    
-    // Obtener la fecha actual en el formato "YYYY-MM-DD"
-    const today = new Date().toISOString().split('T')[0];
-    const startOfDay = today + " 00:00:00";
-    const endOfDay = today + " 23:59:59";
-    
-    // Consultar todas las extracciones del día actual
     const q = query(
-      extractionsRef,
-      orderBy('extraction_date'),
+      collection(db, 'extractions'),
       where('extraction_date', '>=', startOfDay),
-      where('extraction_date', '<=', endOfDay)
+      where('extraction_date', '<=', endOfDay),
+      orderBy('extraction_date', 'desc')
     );
-    
+
     const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      extraction_date: doc.data().extraction_date,
-      total_practices: doc.data().total_practices,
-      source: doc.data().source,
-      max_pages: doc.data().max_pages,
-      use_selenium: doc.data().use_selenium
-    }));
+    const extractions = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        extraction_date: data.extraction_date,
+        total_practices: data.total_practices || 0,
+        source: data.source || '',
+        max_pages: data.max_pages || 0,
+        use_selenium: data.use_selenium || false
+      };
+    });
+
+    console.log('Extracciones encontradas:', extractions.length);
+    console.log('Datos de las extracciones:', JSON.stringify(extractions, null, 2));
+
+    return extractions;
   } catch (error) {
-    console.error('Error getting today extractions:', error);
+    console.error('Error al obtener extracciones:', error);
     return [];
   }
 }
@@ -236,50 +256,56 @@ export async function getTodayPracticesByCategory(): Promise<{
   extractionDate: string | null, 
   practices: { [category: string]: Practice[] } 
 }> {
-  const todayExtractions = await getTodayExtractions();
-  
-  if (todayExtractions.length === 0) {
-    return { extractionDate: null, practices: {} };
-  }
-  
-  // Inicializar objeto para almacenar todas las prácticas por categoría
-  const allPracticesByCategory: { [category: string]: Practice[] } = {};
-  
-  // Inicializar cada categoría con un array vacío
-  for (const category of Object.keys(categories)) {
-    allPracticesByCategory[category] = [];
-  }
-  allPracticesByCategory['Otros'] = [];
-  
-  // Obtener y combinar las prácticas de todas las extracciones del día
-  for (const extraction of todayExtractions) {
-    const extractionPractices = await getPractices(extraction.id);
+  const extractions = await getTodayExtractions();
+  console.log('Total de extracciones encontradas:', extractions.length);
+
+  let practicesByCategory: { [category: string]: Practice[] } = {};
+  let extractionDate: string | null = null;
+
+  if (extractions.length === 0) {
+    console.log('No se encontraron extracciones recientes');
+    // Si no hay extracciones recientes, obtener la última extracción disponible
+    const lastExtractionQuery = query(
+      collection(db, 'extractions'),
+      orderBy('extraction_date', 'desc'),
+      limit(1)
+    );
     
-    // Combinar las prácticas por categoría
-    for (const [category, practices] of Object.entries(extractionPractices)) {
-      if (allPracticesByCategory[category]) {
-        // Filtrar duplicados basados en la URL
-        const existingUrls = new Set(allPracticesByCategory[category].map(p => p.url));
-        const newPractices = practices.filter(p => !existingUrls.has(p.url));
-        allPracticesByCategory[category].push(...newPractices);
-      }
+    const lastExtractionSnapshot = await getDocs(lastExtractionQuery);
+    if (!lastExtractionSnapshot.empty) {
+      const lastExtraction = lastExtractionSnapshot.docs[0];
+      const lastExtractionData = lastExtraction.data();
+      console.log('Usando última extracción disponible:', lastExtractionData.extraction_date);
+      
+      const practices = await getPractices(lastExtraction.id);
+      practicesByCategory = practices;
+      extractionDate = lastExtractionData.extraction_date;
     }
-  }
-  
-  // Eliminar categorías vacías
-  for (const category of Object.keys(allPracticesByCategory)) {
-    if (allPracticesByCategory[category].length === 0) {
-      delete allPracticesByCategory[category];
+  } else {
+    // Si hay extracciones recientes, combinar todas las prácticas
+    console.log('Procesando extracciones encontradas:', extractions.length);
+    for (const extraction of extractions) {
+      console.log('Procesando extracción:', extraction.id, 'de fuente:', extraction.source);
+      const practices = await getPractices(extraction.id);
+      
+      // Combinar las prácticas con las existentes
+      Object.entries(practices).forEach(([category, categoryPractices]) => {
+        if (!practicesByCategory[category]) {
+          practicesByCategory[category] = [];
+        }
+        practicesByCategory[category].push(...categoryPractices);
+      });
     }
+    extractionDate = extractions[0].extraction_date;
   }
-  
-  // Usar la fecha de la extracción más reciente
-  const latestExtraction = todayExtractions.reduce((latest, current) => {
-    return !latest || current.extraction_date > latest.extraction_date ? current : latest;
-  }, todayExtractions[0]);
-  
-  return { 
-    extractionDate: latestExtraction.extraction_date, 
-    practices: allPracticesByCategory 
+
+  // Imprimir resumen de prácticas por categoría
+  Object.entries(practicesByCategory).forEach(([category, practices]) => {
+    console.log(`Categoría ${category}: ${practices.length} prácticas`);
+  });
+
+  return {
+    extractionDate,
+    practices: practicesByCategory
   };
 } 
