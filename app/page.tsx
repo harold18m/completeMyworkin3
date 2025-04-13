@@ -3,13 +3,7 @@ import Navbar from '@/components/navbar';
 import Counter from '@/components/counter';
 import { 
   ArrowRight, 
-  Briefcase, 
-  Users, 
-  Building2,
-  Bot,
-  FileText,
-  Network,
-  GraduationCap
+  Briefcase
 } from 'lucide-react';
 
 export default function Home() {
@@ -87,46 +81,46 @@ export default function Home() {
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-lg overflow-hidden">
-            <div className="flex animate-scroll gap-12 items-center">
+            <div className="flex animate-scroll gap-6 md:gap-12 items-center">
               {/* First set of logos */}
-              <div className="flex gap-12 items-center min-w-full justify-around py-4">
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+              <div className="flex gap-6 md:gap-12 items-center min-w-full justify-around py-4">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(1).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(2).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(3).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(4).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(5).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(6).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
               </div>
               {/* Duplicate set of logos for seamless loop */}
-              <div className="flex gap-12 items-center min-w-full justify-around py-4">
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+              <div className="flex gap-6 md:gap-12 items-center min-w-full justify-around py-4">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(1).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(2).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(3).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(4).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(5).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
-                <div className="w-32 h-32 flex items-center justify-center p-4 hover:scale-110 transition-transform duration-300">
+                <div className="w-32 md:w-32 h-32 md:h-32 flex items-center justify-center p-1 md:p-4 hover:scale-110 transition-transform duration-300">
                   <img src="/companies/klipartz.com(6).png" alt="Logo Empresa" className="w-full h-full object-contain" />
                 </div>
               </div>
@@ -145,146 +139,85 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 md:py-16 px-4 bg-white">
+      {/* CV Optimization Section */}
+      <section className="py-16 px-4 bg-white">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-16">
-            {/* Feature 1: AI Assistant */}
-            <div className="space-y-8">
-              <div className="bg-blue-50 p-4 rounded-2xl inline-block">
-                <Bot className="h-8 w-8 text-[#028bbf]" />
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Optimiza tu CV en minutos
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Recibe recomendaciones personalizadas y mejora tu CV con IA. Destaca entre los demás
+              candidatos de manera rápida y sencilla.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12 mt-16">
+            {/* Step 1 */}
+            <div className="text-center space-y-6">
+              <div className="relative mx-auto w-[260px] h-[520px]">
+                <img 
+                  src="/cv_screens/6ce38e_5d9dbf82348b4f50987fa1064f360b42~mv2.avif" 
+                  alt="Envía tu CV por WhatsApp" 
+                  className="w-full h-full object-cover rounded-[32px] shadow-xl"
+                />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Worky, tu asistente de IA</h2>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Recibe feedback personalizado sobre tu CV</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Practica entrevistas con IA y mejora tus respuestas</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Obtén consejos personalizados para tu búsqueda laboral</span>
-                </li>
-              </ul>
+              <h3 className="text-xl font-semibold text-gray-900">1. Envía tu CV</h3>
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center space-y-6">
+              <div className="relative mx-auto w-[260px] h-[520px]">
+                <img 
+                  src="/cv_screens/Diseño sin título (9)_edited.avif" 
+                  alt="Menciona la posición deseada" 
+                  className="w-full h-full object-cover rounded-[32px] shadow-xl"
+                />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900">2. Menciona la posición que te interesa</h3>
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center space-y-6">
+              <div className="relative mx-auto w-[260px] h-[520px]">
+                <img 
+                  src="/cv_screens/Diseño sin título (10)_edited.avif" 
+                  alt="Recibe tu análisis en PDF" 
+                  className="w-full h-full object-cover rounded-[32px] shadow-xl"
+                />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900">3. Recibe tu análisis en pdf</h3>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link 
+              href="https://api.whatsapp.com/send/?phone=+51966384746"
+              className="inline-flex items-center justify-center px-8 py-3 bg-[#028bbf] text-white rounded-full font-medium hover:bg-[#027ba8] transition-colors shadow-lg hover:shadow-xl"
+            >
+              Optimiza tu CV ahora
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Banner between CV and Interview sections */}
+      <section className="py-20 bg-gradient-to-r from-emerald-500 via-[#028bbf] to-emerald-500">
+        <div className="container mx-auto max-w-4xl px-4">
+          <div className="text-center text-white space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+              Un buen CV te abre puertas, pero una gran entrevista te consigue el trabajo.
+            </h2>
+            <p className="text-xl text-white/90">
+              Nosotros te ayudamos con ambos.
+            </p>
+            <div className="mt-8">
               <Link 
                 href="https://api.whatsapp.com/send/?phone=+51966384746"
-                className="inline-flex items-center text-[#028bbf] font-medium hover:text-[#027ba8] transition-colors"
+                className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
               >
-                Conoce a Worky
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </div>
-
-            {/* Feature 2: CV Builder */}
-            <div className="space-y-8">
-              <div className="bg-blue-50 p-4 rounded-2xl inline-block">
-                <FileText className="h-8 w-8 text-[#028bbf]" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">CV Optimizado con IA</h2>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Crea un CV profesional en minutos</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Optimiza tu CV para cada postulación</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Destaca tus logros y habilidades clave</span>
-                </li>
-              </ul>
-              <Link 
-                href="/cv-builder"
-                className="inline-flex items-center text-[#028bbf] font-medium hover:text-[#027ba8] transition-colors"
-              >
-                Crear mi CV
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </div>
-
-            {/* Feature 3: Job Matching */}
-            <div className="space-y-8">
-              <div className="bg-blue-50 p-4 rounded-2xl inline-block">
-                <Network className="h-8 w-8 text-[#028bbf]" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">Match Inteligente</h2>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Encuentra ofertas que coincidan con tu perfil</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Recibe alertas de nuevas oportunidades</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Postula a empleos verificados y confiables</span>
-                </li>
-              </ul>
-              <Link 
-                href="/bolsa-trabajo"
-                className="inline-flex items-center text-[#028bbf] font-medium hover:text-[#027ba8] transition-colors"
-              >
-                Ver empleos
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </div>
-
-            {/* Feature 4: Learning */}
-            <div className="space-y-8">
-              <div className="bg-blue-50 p-4 rounded-2xl inline-block">
-                <GraduationCap className="h-8 w-8 text-[#028bbf]" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">Desarrollo Profesional</h2>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Accede a recursos de aprendizaje exclusivos</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Participa en talleres y eventos de networking</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="bg-blue-50 p-1 rounded-full mt-1">
-                    <ArrowRight className="h-4 w-4 text-[#028bbf]" />
-                  </div>
-                  <span className="text-gray-600">Mejora tus habilidades profesionales</span>
-                </li>
-              </ul>
-              <Link 
-                href="/recursos"
-                className="inline-flex items-center text-[#028bbf] font-medium hover:text-[#027ba8] transition-colors"
-              >
-                Explorar recursos
+                Prueba gratis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </div>
@@ -292,27 +225,75 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-8 md:py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="bg-blue-100 p-3 rounded-xl">
-                  <Users className="h-8 w-8 text-[#028bbf]" />
+      {/* Interview Simulation Section */}
+      <section className="py-20 px-4 bg-white overflow-hidden">
+        <div className="container mx-auto max-w-6xl relative">
+          <div className="relative grid lg:grid-cols-2 gap-12 items-center">
+            {/* Content Side */}
+            <div className="z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                Estás a sólo un paso de practicar para tus entrevistas
+              </h2>
+              <p className="text-lg text-gray-600 mb-12">
+                Nuestro agente de IA está disponible las 24 horas del día, los 7 días de la semana,
+                garantizando que cada estudiante pueda practicar en cualquier momento.
+              </p>
+
+              <div className="grid grid-cols-2 gap-6">
+                {/* Benefit 1 */}
+                <div className="bg-[#003B6D] text-white p-6 rounded-2xl">
+                  <h3 className="text-lg font-semibold">Aumenta tu confianza</h3>
                 </div>
-                <h3 className="text-4xl font-bold text-[#028bbf]">2,000+</h3>
+
+                {/* Benefit 2 */}
+                <div className="bg-[#003B6D] text-white p-6 rounded-2xl">
+                  <h3 className="text-lg font-semibold">Simula entrevistas reales</h3>
+                </div>
+
+                {/* Benefit 3 */}
+                <div className="bg-[#003B6D] text-white p-6 rounded-2xl">
+                  <h3 className="text-lg font-semibold">Mejora tus respuestas</h3>
+                </div>
+
+                {/* Benefit 4 */}
+                <div className="bg-[#003B6D] text-white p-6 rounded-2xl">
+                  <h3 className="text-lg font-semibold">Destaca frente a otros</h3>
+                </div>
               </div>
-              <p className="text-gray-600">Jóvenes empleados</p>
             </div>
-            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="bg-blue-100 p-3 rounded-xl">
-                  <Building2 className="h-8 w-8 text-[#028bbf]" />
-                </div>
-                <h3 className="text-4xl font-bold text-[#028bbf]">500+</h3>
+
+            {/* Phone Image Side */}
+            <div className="lg:justify-self-end">
+              <div className="relative w-[300px] md:w-[400px] mx-auto">
+                <img 
+                  src="/simular_entrevista/Diseño sin título (11)_edited.avif" 
+                  alt="Simulador de entrevistas" 
+                  className="w-full h-auto rounded-3xl shadow-2xl"
+                />
               </div>
-              <p className="text-gray-600">Empresas confían</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Traditional Process Banner */}
+      <section className="py-20 bg-gradient-to-r from-emerald-500 via-[#028bbf] to-emerald-500">
+        <div className="container mx-auto max-w-4xl px-4">
+          <div className="text-center text-white space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+              ¿No sabes dónde buscar prácticas? ¿Te parece desordenado el proceso tradicional?
+            </h2>
+            <p className="text-xl text-white/90">
+              Nosotros lo hacemos fácil.
+            </p>
+            <div className="mt-8">
+              <Link 
+                href="/bolsa-trabajo"
+                className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
+              >
+                Bolsa de trabajo
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </div>
           </div>
         </div>
