@@ -1,21 +1,28 @@
-import type React from "react"
-import "./globals.css"
-import type { Metadata } from "next"
+import type { Metadata } from 'next'
+import { Poppins } from 'next/font/google'
+import './globals.css'
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-poppins',
+})
 
 export const metadata: Metadata = {
-  title: "MyWorkIn - Portal de Oportunidades Laborales",
-  description: "Encuentra prácticas y trabajos actualizados diariamente",
-    generator: 'v0.dev'
+  title: 'MyWorkIn - Portal de Prácticas',
+  description: 'Encuentra las mejores prácticas profesionales',
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="es">
-      <body>{children}</body>
+    <html lang="es" className={poppins.variable}>
+      <body className="font-poppins">
+        {children}
+      </body>
     </html>
   )
 }
