@@ -12,7 +12,7 @@ export default function Counter({ end, duration = 2000, suffix = '' }: CounterPr
   const [count, setCount] = useState(0);
   const countRef = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
