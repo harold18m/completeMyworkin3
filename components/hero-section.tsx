@@ -15,7 +15,7 @@ export default function HeroSection() {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-[#028bbf] to-blue-600 bg-clip-text text-transparent">
-                Tu primer trabajo con IA
+                Tu primer trabajo con IA 
               </h1>
               <p className="text-xl text-gray-600 mb-8">
                 La plataforma #1 de empleabilidad juvenil en Perú que conecta estudiantes y talentos junior con oportunidades laborales reales.
