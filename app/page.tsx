@@ -368,13 +368,15 @@ export default function Home() {
               ¡Atrévete a dar el salto. Aplica y empieza algo distinto!
             </h2>
             <div className="mt-8">
-              <Link 
-                href="/bolsa-trabajo"
+              <a 
+                href="https://tally.so/r/nG7oWZ"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
               >
                 Explora más ah...
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </a>
             </div>
           </div>
         </div>

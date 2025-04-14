@@ -23,7 +23,7 @@ export default function Navbar() {
                 Bolsa de trabajo
               </Link>
               <Link href="/agentes-ai" className="text-gray-700 hover:text-[#028bbf] transition-colors text-sm font-medium">
-                Agentes de AI
+                Bots de empleabilidad
               </Link>
             </nav>
           </div>
