@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Counter from '@/components/counter';
-import { 
-  ArrowRight, 
+import {
+  ArrowRight,
   Briefcase
 } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-indigo-100 font-poppins">
       <Navbar />
-      
+
       {/* Espaciador para compensar el header fijo */}
       <div className="h-[52px]"></div>
 
@@ -25,17 +25,18 @@ export default function Home() {
                 <span className="text-[#028bbf]">Nuestros bots de empleabilidad</span>
               </h1>
               <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8">
-                Potencia tu búsqueda laboral con IA. Optimiza tu CV, practica entrevistas y encuentra oportunidades laborales ideales para ti. Ya ayudamos a +2,000 jóvenes a conseguir su primer empleo.
+                Optimiza tu CV, practica entrevistas y recibe alertas de trabajos desde WhatsApp.
+                Más de 2,000 jóvenes ya lo están usando.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link 
+                <Link
                   href="https://api.whatsapp.com/send/?phone=+51966384746"
                   className="inline-flex items-center justify-center px-6 py-3 bg-[#028bbf] text-white rounded-full font-medium hover:bg-[#027ba8] transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto"
                 >
                   Empezar con Worky
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
-                <Link 
+                <Link
                   href="/bolsa-trabajo"
                   className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#028bbf] rounded-full font-medium hover:bg-gray-50 transition-colors border border-[#028bbf] shadow-lg hover:shadow-xl w-full sm:w-auto"
                 >
@@ -127,7 +128,7 @@ export default function Home() {
             </div>
 
             <div className="mt-8 text-center">
-              <Link 
+              <Link
                 href="/bolsa-trabajo"
                 className="inline-flex items-center justify-center px-6 py-3 bg-[#028bbf] text-white rounded-full font-medium hover:bg-[#027ba8] transition-colors shadow-lg hover:shadow-xl"
               >
@@ -156,9 +157,9 @@ export default function Home() {
             {/* Step 1 */}
             <div className="text-center space-y-6">
               <div className="relative mx-auto w-[260px] h-[520px]">
-                <img 
-                  src="/cv_screens/6ce38e_5d9dbf82348b4f50987fa1064f360b42~mv2.avif" 
-                  alt="Envía tu CV por WhatsApp" 
+                <img
+                  src="/cv_screens/1.png"
+                  alt="Envía tu CV por WhatsApp"
                   className="w-full h-full object-cover rounded-[32px] shadow-xl"
                 />
               </div>
@@ -168,9 +169,9 @@ export default function Home() {
             {/* Step 2 */}
             <div className="text-center space-y-6">
               <div className="relative mx-auto w-[260px] h-[520px]">
-                <img 
-                  src="/cv_screens/Diseño sin título (9)_edited.avif" 
-                  alt="Menciona la posición deseada" 
+                <img
+                  src="/cv_screens/2.png"
+                  alt="Menciona la posición deseada"
                   className="w-full h-full object-cover rounded-[32px] shadow-xl"
                 />
               </div>
@@ -180,9 +181,9 @@ export default function Home() {
             {/* Step 3 */}
             <div className="text-center space-y-6">
               <div className="relative mx-auto w-[260px] h-[520px]">
-                <img 
-                  src="/cv_screens/Diseño sin título (10)_edited.avif" 
-                  alt="Recibe tu análisis en PDF" 
+                <img
+                  src="/cv_screens/3.png"
+                  alt="Recibe tu análisis en PDF"
                   className="w-full h-full object-cover rounded-[32px] shadow-xl"
                 />
               </div>
@@ -191,7 +192,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <Link 
+            <Link
               href="https://api.whatsapp.com/send/?phone=+51966384746"
               className="inline-flex items-center justify-center px-8 py-3 bg-[#028bbf] text-white rounded-full font-medium hover:bg-[#027ba8] transition-colors shadow-lg hover:shadow-xl"
             >
@@ -213,7 +214,7 @@ export default function Home() {
               Nosotros te ayudamos con ambos.
             </p>
             <div className="mt-8">
-              <Link 
+              <Link
                 href="https://api.whatsapp.com/send/?phone=+51966384746"
                 className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
               >
@@ -265,9 +266,9 @@ export default function Home() {
             {/* Phone Image Side */}
             <div className="lg:justify-self-end">
               <div className="relative w-[300px] md:w-[400px] mx-auto">
-                <img 
-                  src="/simular_entrevista/Diseño sin título (11)_edited.avif" 
-                  alt="Simulador de entrevistas" 
+                <img
+                  src="/cv_screens/4.png"
+                  alt="Simulador de entrevistas"
                   className="w-full h-auto rounded-3xl shadow-2xl"
                 />
               </div>
@@ -287,11 +288,91 @@ export default function Home() {
               Nosotros lo hacemos fácil.
             </p>
             <div className="mt-8">
-              <Link 
+              <Link
                 href="/bolsa-trabajo"
                 className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
               >
                 Bolsa de trabajo
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* International Startups Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              ¿Quieres trabajar en una startup<br />del extranjero?
+            </h2>
+            <p className="text-lg text-gray-600">
+              Ahora puedes hacerlo con MyWorkIn + Balancix.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+            {/* Servicios */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">😊</span>
+                <h3 className="text-xl font-semibold text-[#028bbf]">Servicios</h3>
+              </div>
+              <p className="text-gray-600">
+                Descubre oportunidades reales para crecer profesionalmente en startups del extranjero. Conecta con empresas innovadoras y gana experiencia internacional de manera remota.
+              </p>
+            </div>
+
+            {/* Beneficios */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⭐</span>
+                <h3 className="text-xl font-semibold text-[#028bbf]">Beneficios</h3>
+              </div>
+              <p className="text-gray-600">
+                Accede a prácticas en startups que están creciendo rápido. Amplía tu red, suma habilidades clave y da un paso fuerte hacia tu futuro profesional.
+              </p>
+            </div>
+
+            {/* Experiencia */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🌎</span>
+                <h3 className="text-xl font-semibold text-[#028bbf]">Experiencia</h3>
+              </div>
+              <p className="text-gray-600">
+                Trabaja en entornos desafiantes y aprende de equipos que están construyendo el futuro. Desarrolla tus habilidades en un contexto global y dinámico.
+              </p>
+            </div>
+
+            {/* Apoyo */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚡</span>
+                <h3 className="text-xl font-semibold text-[#028bbf]">Apoyo</h3>
+              </div>
+              <p className="text-gray-600">
+                No vas solo. Te acompañamos en cada paso para que aproveches al máximo esta experiencia. Desde antes de la postulación hasta el cierre de tu práctica.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Banner */}
+      <section className="py-20 bg-gradient-to-r from-emerald-500 via-[#028bbf] to-emerald-500">
+        <div className="container mx-auto max-w-4xl px-4">
+          <div className="text-center text-white space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+              ¡Atrévete a dar el salto. Aplica y empieza algo distinto!
+            </h2>
+            <div className="mt-8">
+              <Link 
+                href="/bolsa-trabajo"
+                className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
+              >
+                Explora más ah...
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </div>
