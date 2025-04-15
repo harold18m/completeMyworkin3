@@ -49,7 +49,7 @@ export default function Home() {
               <div className="bg-white p-4 md:p-8 rounded-2xl shadow-2xl transform hover:scale-[1.02] transition-transform duration-300">
                 <div className="aspect-[9/16] w-[280px] md:w-[300px] mx-auto">
                   <iframe
-                    src="https://www.youtube.com/embed/IQLA4R-LrwI?autoplay=1&mute=1"
+                    src="https://www.youtube.com/embed/dxl9sUeC6lY?autoplay=1&mute=1&controls=1"
                     title="MyWorkIn Bot Demo"
                     className="w-full h-full rounded-xl shadow-lg"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

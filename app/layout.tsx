@@ -20,6 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={poppins.variable}>
+      <head>
+        <link rel="icon" type="image/png" sizes="32x32" href="/pestana_logo/MyWorkIn (Simbolo).png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/pestana_logo/MyWorkIn (Simbolo).png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/pestana_logo/MyWorkIn (Simbolo).png" />
+      </head>
       <body className="font-poppins">
         {children}
       </body>
