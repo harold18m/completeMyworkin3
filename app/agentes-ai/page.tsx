@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import { ArrowRight, Bot, MessageSquare, FileText, Users } from 'lucide-react';
+import { db } from '@/firebase/config';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
 export default function BotsEmpleabilidad() {
   const [timeLeft, setTimeLeft] = useState({
@@ -13,24 +15,56 @@ export default function BotsEmpleabilidad() {
     seconds: 0
   });
 
-  // Fecha objetivo: 8 días desde ahora (ajusta según necesites)
   useEffect(() => {
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 8);
+    const fetchTargetDate = async () => {
+      try {
+        // Buscar la cuenta regresiva para "El Chambas"
+        const q = query(
+          collection(db, 'cuentas_regresivas'),
+          where('bot', '==', 'El Chambas'),
+          orderBy('createdAt', 'desc'),
+          limit(1)
+        );
 
-    const timer = setInterval(() => {
-      const now = new Date();
-      const difference = targetDate.getTime() - now.getTime();
+        const querySnapshot = await getDocs(q);
+        let targetDate;
 
-      setTimeLeft({
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60)
-      });
-    }, 1000);
+        if (!querySnapshot.empty) {
+          // Usar la fecha del documento más reciente
+          targetDate = querySnapshot.docs[0].data().targetDate.toDate();
+        } else {
+          // Si no hay fecha en Firestore, usar una fecha por defecto
+          targetDate = new Date();
+          targetDate.setDate(targetDate.getDate() + 8);
+        }
 
-    return () => clearInterval(timer);
+        const timer = setInterval(() => {
+          const now = new Date();
+          const difference = targetDate.getTime() - now.getTime();
+
+          if (difference < 0) {
+            setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            clearInterval(timer);
+            return;
+          }
+
+          setTimeLeft({
+            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+            minutes: Math.floor((difference / 1000 / 60) % 60),
+            seconds: Math.floor((difference / 1000) % 60)
+          });
+        }, 1000);
+
+        return () => clearInterval(timer);
+      } catch (error) {
+        console.error("Error fetching target date:", error);
+        // En caso de error, mostrar una cuenta regresiva por defecto
+        setTimeLeft({ days: 8, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    fetchTargetDate();
   }, []);
 
   return (

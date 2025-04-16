@@ -8,7 +8,7 @@ import {
   getDoc,
   where
 } from 'firebase/firestore';
-import { db } from '@/firebase/config';
+import { worksDb } from '@/firebase/works-config';
 
 // Tipos de datos para las prácticas y categorías
 export interface Practice {
@@ -110,7 +110,7 @@ function classifyPractice(practice: Practice): string {
 // Obtener la extracción más reciente
 export async function getLatestExtraction(): Promise<ExtractedData | null> {
   try {
-    const extractionsRef = collection(db, 'extractions');
+    const extractionsRef = collection(worksDb, 'extractions');
     const q = query(extractionsRef, orderBy('extraction_date', 'desc'), limit(1));
     const querySnapshot = await getDocs(q);
     
@@ -137,7 +137,7 @@ export async function getLatestExtraction(): Promise<ExtractedData | null> {
 export async function getPractices(extractionId: string): Promise<{ [category: string]: Practice[] }> {
   console.log('Obteniendo prácticas para extracción:', extractionId);
   try {
-    const practicesRef = collection(db, `extractions/${extractionId}/practices`);
+    const practicesRef = collection(worksDb, `extractions/${extractionId}/practices`);
     const querySnapshot = await getDocs(practicesRef);
     
     // Inicializar objeto para almacenar prácticas por categoría
@@ -222,7 +222,7 @@ export async function getTodayExtractions(): Promise<ExtractedData[]> {
 
   try {
     const q = query(
-      collection(db, 'extractions'),
+      collection(worksDb, 'extractions'),
       where('extraction_date', '>=', startOfDay),
       where('extraction_date', '<=', endOfDay),
       orderBy('extraction_date', 'desc')
@@ -266,7 +266,7 @@ export async function getTodayPracticesByCategory(): Promise<{
     console.log('No se encontraron extracciones recientes');
     // Si no hay extracciones recientes, obtener la última extracción disponible
     const lastExtractionQuery = query(
-      collection(db, 'extractions'),
+      collection(worksDb, 'extractions'),
       orderBy('extraction_date', 'desc'),
       limit(1)
     );

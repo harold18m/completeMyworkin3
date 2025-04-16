@@ -6,17 +6,16 @@ import { getFirestore } from "firebase/firestore";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAfjW_DrMNv-Z0mXg3ynVhVxdZ9q6VaWrQ",
-  authDomain: "works-today.firebaseapp.com",
-  projectId: "works-today",
-  storageBucket: "works-today.firebasestorage.app",
-  messagingSenderId: "253625369676",
-  appId: "1:253625369676:web:754edb514ea782cf8160e9",
-  measurementId: "G-J8PBL6XKZ4"
+  apiKey: "AIzaSyCfc9uJafS9qo0csb7M4eXm48KCd_GUI8A",
+  authDomain: "regresiva-pagina-myworkin.firebaseapp.com",
+  projectId: "regresiva-pagina-myworkin",
+  storageBucket: "regresiva-pagina-myworkin.firebasestorage.app",
+  messagingSenderId: "701939730349",
+  appId: "1:701939730349:web:f04f1bb977d5449982c324"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase with a specific name
+const app = initializeApp(firebaseConfig, 'countdown-app');
 // const analytics = getAnalytics(app); // Comentado para evitar errores en SSR
 
 // Initialize Firestore
