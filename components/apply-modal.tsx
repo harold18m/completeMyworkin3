@@ -9,9 +9,12 @@ interface ApplyModalProps {
   onApply: () => void;
   workyUrl: string;
   jobTitle: string;
+  jobUrl: string; // Acepta la URL como prop
 }
 
-export default function ApplyModal({ isOpen, onClose, onApply, workyUrl, jobTitle }: ApplyModalProps) {
+export default function ApplyModal({ isOpen, onClose, onApply, workyUrl, jobTitle, jobUrl }: ApplyModalProps) {
+  
+  console.log("URL",jobUrl);
   if (!isOpen) return null;
 
   const handleWorkyClick = () => {
@@ -21,6 +24,8 @@ export default function ApplyModal({ isOpen, onClose, onApply, workyUrl, jobTitl
 
   const handlePostularClick = () => {
     trackButtonClick('Postular ahora');
+    window.open(jobUrl, '_blank'); // Redirige a la URL de la práctica
+
     onApply();
     onClose();
   };
@@ -73,4 +78,4 @@ export default function ApplyModal({ isOpen, onClose, onApply, workyUrl, jobTitl
       </div>
     </div>
   );
-} 
+}

@@ -23,6 +23,7 @@ export interface Practice {
   posted_date?: string;
   category: string;
   source: string;
+  link: string;
 }
 
 export interface ExtractedData {

@@ -127,6 +127,7 @@ export default function JobListing({ practice }: JobListingProps) {
         onApply={handleApply}
         workyUrl="https://mc.ht/s/SH1lIgc"
         jobTitle={practice.title}
+        jobUrl={practice.link} 
       />
     </div>
   )
