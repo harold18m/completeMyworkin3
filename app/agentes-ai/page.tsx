@@ -6,6 +6,29 @@ import Navbar from '@/components/navbar';
 import { ArrowRight, Bot, MessageSquare, FileText, Users } from 'lucide-react';
 import { db } from '@/firebase/config';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { trackButtonClick, trackBotInteraction } from '@/utils/analytics';
+import { Button } from '@/components/ui/button';
+
+const TrackedButton = ({ onClick, className, children, trackingName }: {
+  onClick: () => void,
+  className: string,
+  children: React.ReactNode,
+  trackingName: string
+}) => {
+  const handleClick = () => {
+    trackButtonClick(trackingName);
+    onClick();
+  };
+
+  return (
+    <Button
+      className={className}
+      onClick={handleClick}
+    >
+      {children}
+    </Button>
+  );
+};
 
 export default function BotsEmpleabilidad() {
   const [timeLeft, setTimeLeft] = useState({
@@ -126,13 +149,16 @@ export default function BotsEmpleabilidad() {
                 </div>
               </div>
 
-              <Link 
-                href="https://api.whatsapp.com/send/?phone=+51966384746"
+              <TrackedButton
+                onClick={() => {
+                  trackBotInteraction('Worky');
+                }}
                 className="inline-flex items-center justify-center w-full px-6 py-3 bg-[#028bbf] text-white rounded-xl font-medium hover:bg-[#027ba8] transition-colors"
+                trackingName="Comenzar ahora"
               >
                 Comenzar ahora
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </TrackedButton>
             </div>
 
             {/* El Chambas - Próximamente */}

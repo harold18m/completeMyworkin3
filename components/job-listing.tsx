@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Practice } from '@/services/firebase';
 import ApplyModal from './apply-modal';
+import { trackApplicationStart } from '@/utils/analytics';
 
 interface JobListingProps {
   practice: Practice;
@@ -12,6 +13,7 @@ export default function JobListing({ practice }: JobListingProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleApply = () => {
+    trackApplicationStart(practice.title);
     window.open(practice.url, '_blank');
   };
 
@@ -105,7 +107,10 @@ export default function JobListing({ practice }: JobListingProps) {
       {/* Nuevo botón de Aplicar */}
       <div className="flex justify-center w-full">
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setIsModalOpen(true);
+            trackApplicationStart(practice.title);
+          }}
           className="w-full mt-3 bg-[#028bbf] text-white px-6 py-2 rounded-lg font-medium text-sm hover:bg-[#027ba8] transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -121,6 +126,7 @@ export default function JobListing({ practice }: JobListingProps) {
         onClose={() => setIsModalOpen(false)}
         onApply={handleApply}
         workyUrl="https://mc.ht/s/SH1lIgc"
+        jobTitle={practice.title}
       />
     </div>
   )

@@ -34,8 +34,8 @@ export default function JobCategory({ id, icon, title, bgColor = 'bg-amber-50', 
           )}
         </div>
       </div>
-      <div className={`transition-all duration-300 overflow-hidden ${
-        isExpanded ? 'max-h-[2000px] opacity-100 mt-2' : 'max-h-0 opacity-0'
+      <div className={`transition-all duration-300 overflow-y-auto ${
+        isExpanded ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'
       }`}>
         {children}
       </div>

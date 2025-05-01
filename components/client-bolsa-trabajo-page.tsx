@@ -90,7 +90,7 @@ export default function ClientBolsaTrabajoPage() {
     }
 
     return (
-      <div className="p-6 bg-white rounded-xl border border-gray-200 shadow-md">
+      <div className="p-6 bg-white rounded-xl border border-gray-200 shadow-md overflow-y-auto">
         {practices.map((practice) => (
           <JobListing key={practice.id} practice={practice} />
         ))}

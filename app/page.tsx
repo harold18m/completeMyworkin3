@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import Counter from '@/components/counter';
@@ -5,6 +7,29 @@ import {
   ArrowRight,
   Briefcase
 } from 'lucide-react';
+import { trackButtonClick, trackCVOptimization } from '@/utils/analytics';
+
+// Componente de botón con tracking
+const TrackedLink = ({ href, className, children, trackingName }: { 
+  href: string, 
+  className: string, 
+  children: React.ReactNode,
+  trackingName: string 
+}) => {
+  const handleClick = () => {
+    trackButtonClick(trackingName);
+  };
+
+  return (
+    <Link
+      href={href}
+      className={className}
+      onClick={handleClick}
+    >
+      {children}
+    </Link>
+  );
+};
 
 export default function Home() {
   return (
@@ -30,19 +55,21 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
-                  href="https://api.whatsapp.com/send/?phone=+51966384746"
+                  href="https://wa.me/51992695109?text=Hola%2C%20Worky%21"
                   className="inline-flex items-center justify-center px-6 py-3 bg-[#028bbf] text-white rounded-full font-medium hover:bg-[#027ba8] transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto"
+                  onClick={() => trackButtonClick('Empezar con Worky')}
                 >
                   Empezar con Worky
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
-                <Link
+                <TrackedLink
                   href="/bolsa-trabajo"
                   className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#028bbf] rounded-full font-medium hover:bg-gray-50 transition-colors border border-[#028bbf] shadow-lg hover:shadow-xl w-full sm:w-auto"
+                  trackingName="Ver oportunidades"
                 >
                   Ver oportunidades
                   <Briefcase className="ml-2 h-5 w-5" />
-                </Link>
+                </TrackedLink>
               </div>
             </div>
             <div className="relative mt-8 lg:mt-0">
@@ -128,13 +155,14 @@ export default function Home() {
             </div>
 
             <div className="mt-8 text-center">
-              <Link
+              <TrackedLink
                 href="/bolsa-trabajo"
                 className="inline-flex items-center justify-center px-6 py-3 bg-[#028bbf] text-white rounded-full font-medium hover:bg-[#027ba8] transition-colors shadow-lg hover:shadow-xl"
+                trackingName="Ver todas las oportunidades"
               >
                 Ver todas las oportunidades
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </TrackedLink>
             </div>
           </div>
         </div>
@@ -193,8 +221,12 @@ export default function Home() {
 
           <div className="text-center mt-12">
             <Link
-              href="https://api.whatsapp.com/send/?phone=+51966384746"
+              href="https://wa.me/51992695109?text=Hola%2C%20Worky%21"
               className="inline-flex items-center justify-center px-8 py-3 bg-[#028bbf] text-white rounded-full font-medium hover:bg-[#027ba8] transition-colors shadow-lg hover:shadow-xl"
+              onClick={() => {
+                trackButtonClick('Optimiza tu CV ahora');
+                trackCVOptimization();
+              }}
             >
               Optimiza tu CV ahora
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -215,8 +247,9 @@ export default function Home() {
             </p>
             <div className="mt-8">
               <Link
-                href="https://api.whatsapp.com/send/?phone=+51966384746"
+                href="https://wa.me/51992695109?text=Hola%2C%20Worky%21"
                 className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
+                onClick={() => trackButtonClick('Prueba gratis')}
               >
                 Prueba gratis
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -288,13 +321,14 @@ export default function Home() {
               Nosotros lo hacemos fácil.
             </p>
             <div className="mt-8">
-              <Link
+              <TrackedLink
                 href="/bolsa-trabajo"
                 className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#028bbf] transition-colors"
+                trackingName="Bolsa de trabajo"
               >
                 Bolsa de trabajo
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </TrackedLink>
             </div>
           </div>
         </div>
