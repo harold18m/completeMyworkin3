@@ -4,7 +4,15 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  trailingSlash: true
+  trailingSlash: true,
+  async rewrites() {
+    return [
+      {
+        source: '/api/analizar-cv',
+        destination: 'https://api-cv-myworkin.onrender.com/analizar-cv/',
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig 

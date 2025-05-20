@@ -53,6 +53,7 @@ export default function ClientBolsaTrabajoPage() {
   const formattedDate = extractionDate 
     ? new Date(extractionDate).toLocaleDateString('es-ES', { 
         day: 'numeric', 
+        
         month: 'long', 
         year: 'numeric' 
       })

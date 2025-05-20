@@ -3,6 +3,14 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,9 +30,37 @@ export default function Navbar() {
               <Link href="/bolsa-trabajo" className="text-gray-700 hover:text-[#028bbf] transition-colors text-sm font-medium">
                 Bolsa de trabajo
               </Link>
-              <Link href="/agentes-ai" className="text-gray-700 hover:text-[#028bbf] transition-colors text-sm font-medium">
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="text-gray-700 hover:text-[#028bbf] transition-colors text-sm font-medium bg-transparent">
                 Bots de empleabilidad
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="w-[250px] p-2">
+                        <Link 
+                          href="/analizar-cv" 
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#028bbf] rounded-md"
+                        >
+                          Analizar tu CV con AI
+                        </Link>
+                        <Link 
+                          href="/match-cv"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#028bbf] rounded-md"
+                        >
+                          Hacer match de tu CV con prácticas
+                        </Link>
+                        <Link 
+                          href="/crear-cv"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#028bbf] rounded-md"
+                        >
+                          Crear CV
               </Link>
+                      </div>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
             </nav>
           </div>
           
@@ -68,13 +104,32 @@ export default function Navbar() {
               >
                 Bolsa de trabajo
               </Link>
+              <div className="space-y-2">
+                <div className="text-gray-700 font-medium text-sm">Bots de empleabilidad</div>
+                <div className="pl-4 space-y-2">
+                  <Link 
+                    href="/analizar-cv"
+                    className="block text-gray-600 hover:text-[#028bbf] transition-colors text-sm"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Analizar tu CV con AI
+                  </Link>
+                  <Link 
+                    href="/match-cv"
+                    className="block text-gray-600 hover:text-[#028bbf] transition-colors text-sm"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Hacer match de tu CV con prácticas
+              </Link>
               <Link 
-                href="/agentes-ai" 
-                className="text-gray-700 hover:text-[#028bbf] transition-colors text-sm font-medium"
+                    href="/crear-cv"
+                    className="block text-gray-600 hover:text-[#028bbf] transition-colors text-sm"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Agentes de AI
+                    Crear CV
               </Link>
+                </div>
+              </div>
               <a 
                 href="https://mc.ht/s/SH1lIgc"
                 target="_blank"
