@@ -76,16 +76,9 @@ export const uploadCV = async (file) => {
 
 export const analyzeCV = async (pdfUrl, puestoPostular) => {
   try {
-    console.log('Iniciando análisis de CV con:', { pdfUrl, puestoPostular });
-    // Reemplazar espacios con guiones bajos en el puesto
     const formattedPuesto = puestoPostular.replace(/\s+/g, '_');
-
-    const url = `https://api-cv-myworkin.onrender.com/analizar-cv?pdf_url=${encodeURIComponent(pdfUrl)}&puesto_postular=${encodeURIComponent(formattedPuesto)}`;
-
-    // Realizar la petición GET
-    const response = await fetch(url, {
-      method: 'GET',
-    });
+    const url = `/api/proxy-analizar-cv?pdf_url=${encodeURIComponent(pdfUrl)}&puesto_postular=${encodeURIComponent(formattedPuesto)}`;
+    const response = await fetch(url);
     const text = await response.text();
     let data;
     try {
@@ -102,36 +95,24 @@ export const analyzeCV = async (pdfUrl, puestoPostular) => {
 
 export const matchesCV = async (cvUrl, puestoPostular, telefono) => {
   try {
-    // Construir la URL real del endpoint externo (no proxy interno)
-    const url = `https://api-jobs-tyc1.onrender.com/analizar_cv/?pdf_url=${encodeURIComponent(cvUrl)}&puesto=${encodeURIComponent(puestoPostular)}&numero=${encodeURIComponent(telefono)}`;
-
-    // Realizar la petición GET
-    const response = await fetch(url, {
-      method: 'GET',
-    });
+    const url = `/api/proxy-match-cv?pdf_url=${encodeURIComponent(cvUrl)}&puesto=${encodeURIComponent(puestoPostular)}&numero=${encodeURIComponent(telefono)}`;
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Error al buscar prácticas: ' + response.statusText);
     }
     const data = await response.json();
-    console.log('Respuesta recibida:', data);
-
-    // Validar que la respuesta tenga el array de trabajos
     if (data && Array.isArray(data.trabajos)) {
       return data.trabajos;
     }
-    // Si la respuesta es un objeto con trabajos
     if (data && data.trabajos) {
       return data.trabajos;
     }
-    // Si la respuesta es un string con URL
     if (typeof data === 'string' && data.startsWith('http')) {
       return data;
     }
-    // Si la respuesta es un JSON con pdf_url
     if (data && data.pdf_url) {
       return data.pdf_url;
     }
-    // Si la respuesta está vacía o no es un objeto, devolver la URL original
     return cvUrl;
   } catch (error) {
     console.error('Error detallado al analizar coincidencias de CV:', error);
