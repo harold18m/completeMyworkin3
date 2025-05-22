@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { analyzeCV } from '../../src/utils/cvAnalyzer';
+import { analyzeCV, uploadCV } from '../../src/utils/cvAnalyzer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,10 +56,8 @@ export default function AnalizarCVPage() {
   };
 
   const handleAnalyze = async () => {
-    if (!file) {
-      setError('Por favor, sube un archivo PDF');
-      return;
-    }
+    // 1. Subir el archivo y obtener la URL
+    const pdfUrl = await uploadCV(file);
 
     if (!puestoPostular) {
       setError('Por favor, ingresa el puesto al que postulas');
@@ -71,8 +69,8 @@ export default function AnalizarCVPage() {
     setResult(null);
 
     try {
-      console.log('Iniciando análisis con:', { file, puestoPostular });
-      const result = await analyzeCV(file, puestoPostular);
+      console.log('Iniciando análisis con:', { pdfUrl, puestoPostular });
+      const result = await analyzeCV(pdfUrl, puestoPostular);
       setResult(result);
     } catch (error) {
       console.error('Error en el componente:', error);
@@ -148,15 +146,16 @@ export default function AnalizarCVPage() {
                     <Alert>
                       <AlertTitle>Análisis Completado</AlertTitle>
                       <AlertDescription>
-                        <div className="mt-2">
-                          <p>Tu CV ha sido analizado. Puedes ver los resultados aquí:</p>
+                        <div className="mt-2 flex flex-col items-center gap-2">
+                          <p>Tu CV ha sido analizado correctamente. Puedes ver los resultados en el siguiente enlace:</p>
                           <a
                             href={result}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary hover:underline mt-2 inline-block"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#028bbf] text-white rounded-lg font-medium hover:bg-[#027ba8] transition-colors shadow"
                           >
-                            Ver resultados
+                            <FileText className="h-5 w-5" />
+                            Ver resultados PDF
                           </a>
                         </div>
                       </AlertDescription>
@@ -187,4 +186,4 @@ export default function AnalizarCVPage() {
       </section>
     </div>
   );
-} 
+}
