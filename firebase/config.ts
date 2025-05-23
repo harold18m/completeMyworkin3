@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 // import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
@@ -20,4 +21,5 @@ const app = initializeApp(firebaseConfig, 'countdown-app');
 
 // Initialize Firestore
 export const db = getFirestore(app);
-export default app; 
+export const auth = getAuth(app);
+export default app;

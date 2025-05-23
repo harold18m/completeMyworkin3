@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { analyzeCV, uploadCV } from '../../src/utils/cvAnalyzer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Upload, FileText } from 'lucide-react';
 import Navbar from '@/components/navbar';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function AnalizarCVPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -16,6 +17,37 @@ export default function AnalizarCVPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const { user } = useAuth();
+  const [freeUsed, setFreeUsed] = useState(false);
+  const [longWait, setLongWait] = useState(false);
+  const [veryLongWait, setVeryLongWait] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      const used = localStorage.getItem('cv_analysis_used');
+      setFreeUsed(used === 'true');
+    } else {
+      setFreeUsed(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    let longWaitTimer: NodeJS.Timeout;
+    let veryLongWaitTimer: NodeJS.Timeout;
+    if (loading) {
+      setLongWait(false);
+      setVeryLongWait(false);
+      longWaitTimer = setTimeout(() => setLongWait(true), 30000); // 30s
+      veryLongWaitTimer = setTimeout(() => setVeryLongWait(true), 120000); // 2min
+    } else {
+      setLongWait(false);
+      setVeryLongWait(false);
+    }
+    return () => {
+      clearTimeout(longWaitTimer);
+      clearTimeout(veryLongWaitTimer);
+    };
+  }, [loading]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -56,25 +88,43 @@ export default function AnalizarCVPage() {
   };
 
   const handleAnalyze = async () => {
-    // 1. Subir el archivo y obtener la URL
-    const pdfUrl = await uploadCV(file);
-
+    if (!file) {
+      setError('Por favor, sube un archivo PDF');
+      return;
+    }
     if (!puestoPostular) {
       setError('Por favor, ingresa el puesto al que postulas');
       return;
     }
-
+    if (!user && freeUsed) {
+      setError('Solo puedes analizar tu CV una vez sin iniciar sesión. Inicia sesión para más análisis.');
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
-
+    setLongWait(false);
+    setVeryLongWait(false);
+    let pdfUrl = null;
+    let result = null;
+    let errorMsg = null;
     try {
-      console.log('Iniciando análisis con:', { pdfUrl, puestoPostular });
-      const result = await analyzeCV(pdfUrl, puestoPostular);
-      setResult(result);
+      pdfUrl = await uploadCV(file);
+      result = await analyzeCV(pdfUrl, puestoPostular);
+
+      setResult(result.extractedData.analysisResults.pdf_url);
+      // setResult(result);
+      if (!user) {
+        setFreeUsed(true);
+        localStorage.setItem('cv_analysis_used', 'true');
+      }
     } catch (error) {
-      console.error('Error en el componente:', error);
-      setError(error instanceof Error ? error.message : 'Error al analizar el CV');
+      errorMsg = error instanceof Error ? error.message : 'Error al analizar el CV';
+      setError(errorMsg);
+      if (!user) {
+        setFreeUsed(true);
+        localStorage.setItem('cv_analysis_used', 'true');
+      }
     } finally {
       setLoading(false);
     }
@@ -142,12 +192,29 @@ export default function AnalizarCVPage() {
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
+                  {loading && (
+                    <Alert>
+                      <AlertTitle>Analizando tu CV...</AlertTitle>
+                      <AlertDescription>
+                        <div className="flex flex-col gap-2 items-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-[#028bbf] mb-2" />
+                          <span>Estamos analizando tu CV. Esto puede demorar hasta 2 minutos.</span>
+                          {longWait && !veryLongWait && (
+                            <span className="text-sm text-gray-500">Sigue esperando, esto puede demorar un poco más de lo normal...</span>
+                          )}
+                          {veryLongWait && (
+                            <span className="text-sm text-red-500">El análisis está tardando demasiado. Puedes intentarlo más tarde o revisar tu conexión.</span>
+                          )}
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
                   {result && (
                     <Alert>
-                      <AlertTitle>Análisis Completado</AlertTitle>
+                      <AlertTitle>¡Análisis completado!</AlertTitle>
                       <AlertDescription>
-                        <div className="mt-2 flex flex-col items-center gap-2">
-                          <p>Tu CV ha sido analizado correctamente. Puedes ver los resultados en el siguiente enlace:</p>
+                        <div className="flex flex-col items-center gap-2 mt-2">
+                          <p>Tu CV ha sido analizado correctamente. Puedes ver el resultado en el siguiente enlace:</p>
                           <a
                             href={result}
                             target="_blank"
@@ -155,7 +222,7 @@ export default function AnalizarCVPage() {
                             className="inline-flex items-center gap-2 px-4 py-2 bg-[#028bbf] text-white rounded-lg font-medium hover:bg-[#027ba8] transition-colors shadow"
                           >
                             <FileText className="h-5 w-5" />
-                            Ver resultados PDF
+                            Ver PDF generado
                           </a>
                         </div>
                       </AlertDescription>
@@ -163,7 +230,7 @@ export default function AnalizarCVPage() {
                   )}
                   <Button
                     onClick={handleAnalyze}
-                    disabled={loading || !file || !puestoPostular}
+                    disabled={loading || !file || !puestoPostular || (!user && freeUsed)}
                     className="w-full"
                   >
                     {loading ? (
@@ -178,6 +245,11 @@ export default function AnalizarCVPage() {
                       </>
                     )}
                   </Button>
+                  {!user && freeUsed && (
+                    <div className="text-center text-sm text-gray-500 mt-2">
+                      Has usado tu análisis gratuito. <span className="text-[#028bbf] font-semibold">Inicia sesión</span> para analizar más CVs.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

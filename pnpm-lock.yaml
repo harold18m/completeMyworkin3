@@ -123,7 +123,7 @@ importers:
         specifier: 8.5.1
         version: 8.5.1(react@19.1.0)
       firebase:
-        specifier: ^11.5.0
+        specifier: ^11.6.1
         version: 11.6.1
       framer-motion:
         specifier: ^12.6.5

@@ -86,7 +86,9 @@ export const analyzeCV = async (pdfUrl, puestoPostular) => {
     } catch (e) {
       throw new Error('Respuesta del servidor no es JSON: ' + text.slice(0, 200));
     }
-    return data.pdf_url || data;
+    console.log('Respuesta del servidor:', data);
+    console.log('Respuesta del servidor:', data.extractedData.analysisResults.pdf_url);
+    return data;
   } catch (error) {
     console.error('Error detallado al analizar CV:', error);
     throw new Error(`Error al analizar el CV: ${error.message}`);
