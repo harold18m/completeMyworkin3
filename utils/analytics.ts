@@ -51,4 +51,55 @@ export const trackBotInteraction = (botName: string) => {
     category: 'Bot Interaction',
     label: botName
   });
-}; 
+};
+
+// Eventos específicos para el sistema de CV
+export const trackCVReviewStart = (reviewType: 'free' | 'paid') => {
+  trackEvent({
+    action: 'start_cv_review',
+    category: 'CV Review',
+    label: reviewType
+  });
+};
+
+export const trackCVReviewCompleted = (score: number, reviewType: 'free' | 'paid') => {
+  trackEvent({
+    action: 'complete_cv_review',
+    category: 'CV Review',
+    label: reviewType,
+    value: score
+  });
+};
+
+export const trackCVPackagePurchase = (packageType: string, price: number) => {
+  trackEvent({
+    action: 'purchase_cv_package',
+    category: 'CV Review',
+    label: packageType,
+    value: price
+  });
+};
+
+export const trackCVHistoryView = () => {
+  trackEvent({
+    action: 'view_cv_history',
+    category: 'CV Review',
+    label: 'History Page'
+  });
+};
+
+export const trackDashboardView = () => {
+  trackEvent({
+    action: 'view_dashboard',
+    category: 'Navigation',
+    label: 'Dashboard'
+  });
+};
+
+export const trackTestDataCreation = () => {
+  trackEvent({
+    action: 'create_test_data',
+    category: 'Development',
+    label: 'CV Test Data'
+  });
+};

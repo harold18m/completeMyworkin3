@@ -1,23 +1,32 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 export default function LoginModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [university, setUniversity] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
       if (isRegister) {
-        await createUserWithEmailAndPassword(require("../firebase/config").auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(require("../firebase/config").auth, email, password);
+        
+        // Actualizar el perfil del usuario con el nombre
+        if (displayName) {
+          await updateProfile(userCredential.user, {
+            displayName: displayName
+          });
+        }
+        
         setLoading(false);
         onClose();
       } else {
@@ -41,10 +50,31 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
       >
         <h2 className="text-3xl font-bold mb-2 text-center text-[#028bbf]">
           {isRegister ? "Crear cuenta" : "Iniciar sesión"}
-        </h2>
-        <p className="text-gray-500 text-center text-base mb-2">
+        </h2>        <p className="text-gray-500 text-center text-base mb-2">
           {isRegister ? "Crea una cuenta para acceder a más funciones" : "Accede con tu correo y contraseña"}
         </p>
+        
+        {/* Campos adicionales para registro */}
+        {isRegister && (
+          <>
+            <input
+              className="w-full mb-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] transition text-base"
+              type="text"
+              placeholder="Nombre completo"
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              required
+            />
+            <input
+              className="w-full mb-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] transition text-base"
+              type="text"
+              placeholder="Universidad (opcional)"
+              value={university}
+              onChange={e => setUniversity(e.target.value)}
+            />
+          </>
+        )}
+        
         <input
           className="w-full mb-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] transition text-base"
           type="email"
