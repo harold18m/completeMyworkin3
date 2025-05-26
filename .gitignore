@@ -3,3 +3,15 @@ node_modules/
 .next/
 .env
 .env.local
+
+# Firebase credentials
+firebase-adminsdk-*.json
+*-firebase-adminsdk-*.json
+service-account-*.json
+
+# MercadoPago credentials  
+mercadopago-*.json
+
+# General JSON credentials
+*-credentials.json
+*-private-key.json
