@@ -30,18 +30,18 @@ export default function AnalizarCVPage() {
   const { user } = useAuth();
   const [freeUsed, setFreeUsed] = useState(false);
   const [longWait, setLongWait] = useState(false);
-  const [veryLongWait, setVeryLongWait] = useState(false); // Nuevos estados para el sistema persistente
+  const [veryLongWait, setVeryLongWait] = useState(false);  // Nuevos estados para el sistema persistente
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [userStats, setUserStats] = useState({
     totalReviews: 0,
-    remainingReviews: 0, // Simulamos que no tiene revisiones disponibles
-    freeReviewUsed: true, // Simulamos que ya usó la revisión gratuita
+    remainingReviews: 0,
+    freeReviewUsed: false,
     lastReviewDate: undefined as Date | undefined,
   });
   const [reviewPermission, setReviewPermission] = useState({
     canReview: false,
-    reason: "no_reviews_remaining", // Simulamos que no puede revisar
+    reason: "loading",
   });
   const [reviewId, setReviewId] = useState<string | null>(null);
 
@@ -52,29 +52,23 @@ export default function AnalizarCVPage() {
       const used = localStorage.getItem("cv_analysis_used");
       setFreeUsed(used === "true");
     }
-  }, [user]);
-  const loadUserData = async () => {
+  }, [user]);  const loadUserData = async () => {
     if (!user) return;
 
-    try {
-      // Simulación: Usuario ya usó su revisión gratuita y no tiene revisiones premium
-      const simulatedStats = {
-        totalReviews: 1,
-        remainingReviews: 0, // No tiene revisiones disponibles
-        freeReviewUsed: true, // Ya usó la gratuita
-        lastReviewDate: new Date(),
-      };
+    try {      // Cargar datos reales del usuario
+      const stats = await cvReviewService.getUserStats(user);
+      const permission = await cvReviewService.canUserReview(user);
 
-      const simulatedPermission = {
-        canReview: false,
-        reason: "no_reviews_remaining",
-      };
+      setUserStats({
+        totalReviews: stats.totalReviews,
+        remainingReviews: stats.remainingReviews,
+        freeReviewUsed: stats.freeReviewUsed,
+        lastReviewDate: stats.lastReviewDate || undefined,
+      });
 
-      setUserStats(simulatedStats);
-      setReviewPermission(simulatedPermission);
-      setFreeUsed(true);
+      setReviewPermission(permission);
+      setFreeUsed(stats.freeReviewUsed);
 
-      console.log("Usuario simulado sin revisiones disponibles");
     } catch (error) {
       console.error("Error loading user data:", error);
     }
@@ -158,28 +152,52 @@ export default function AnalizarCVPage() {
         setShowPaymentModal(true);
         return;
       }
-    }
-    setLoading(true);
+    }    setLoading(true);
     setError(null);
     setResult(null);
     setLongWait(false);
     setVeryLongWait(false);
+    
+    let currentReviewId: string | null = null;
+    
     try {
-      // Simulación de análisis de CV exitoso
-      await new Promise((resolve) => setTimeout(resolve, 3000)); // Simular tiempo de procesamiento
-
-      const mockResult =
-        "https://drive.google.com/file/d/1ABC123_SIMULADO_CV_ANALISIS/view";
-      setResult(mockResult);
-
-      // Consumir una revisión del usuario
-      if (user && userStats.remainingReviews > 0) {
-        setUserStats((prev) => ({
-          ...prev,
-          remainingReviews: prev.remainingReviews - 1,
-          totalReviews: prev.totalReviews + 1,
-        }));
+      // 1. Subir el archivo CV
+      const cvUrl = await uploadCV(file);
+      
+      // 2. Crear la revisión en el sistema (solo para usuarios autenticados)
+      if (user) {
+        currentReviewId = await cvReviewService.createReview(user, {
+          fileName: file.name,
+          position: puestoPostular,
+          status: 'processing',
+          fileUrl: cvUrl
+        });
+        setReviewId(currentReviewId);
+        
+        // 3. Consumir una revisión del usuario
+        await cvReviewService.consumeReview(user);
+        
+        // 4. Actualizar estadísticas locales
+        await loadUserData();
       }
+      
+      // 5. Procesar el análisis real del CV
+      const analysisResult = await analyzeCV(cvUrl, puestoPostular);
+      
+      // 6. Actualizar la revisión con el resultado (solo para usuarios autenticados)
+      if (user && currentReviewId) {
+        // Extraer la URL del resultado del análisis
+        const resultUrl = analysisResult?.extractedData?.analysisResults?.pdf_url || cvUrl;
+        
+        await cvReviewService.updateReviewResult(currentReviewId, {
+          resultUrl: resultUrl,
+          status: 'completed'
+        });
+      }
+      
+      // 7. Mostrar el resultado al usuario
+      const finalResultUrl = analysisResult?.extractedData?.analysisResults?.pdf_url || cvUrl;
+      setResult(finalResultUrl);
 
       // Marcar como usado solo después de un análisis exitoso para usuarios no logueados
       if (!user) {
@@ -190,6 +208,18 @@ export default function AnalizarCVPage() {
       const errorMsg =
         error instanceof Error ? error.message : "Error al analizar el CV";
       setError(errorMsg);
+      
+      // Si hubo error y se creó una revisión, actualizarla como fallida
+      if (user && currentReviewId) {
+        try {
+          await cvReviewService.updateReviewResult(currentReviewId, {
+            status: 'failed',
+            errorMessage: errorMsg
+          });
+        } catch (updateError) {
+          console.error('Error actualizando estado de revisión fallida:', updateError);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -214,43 +244,34 @@ export default function AnalizarCVPage() {
       console.error("Error processing purchase:", error);
       setError("Error al procesar la compra. Por favor, contacta soporte.");
     }
-  };
-  const handleSelectPackage = async (packageId: string) => {
+  };  const handleSelectPackage = async (packageId: string) => {
     if (!user) {
       setError("Debes iniciar sesión para comprar un paquete");
       return;
-    }
-
-    try {
-      // Simulación de compra exitosa
-      const selectedPackage = CV_PACKAGES.find((pkg) => pkg.id === packageId);
+    }    try {
+      // Buscar información del paquete
+      const selectedPackage = CV_PACKAGES.find(pkg => pkg.id === packageId);
       if (!selectedPackage) {
         throw new Error("Paquete no encontrado");
       }
 
-      console.log(
-        "Simulando compra exitosa del paquete:",
-        selectedPackage.name
-      );
-
-      // Simular actualización de estado del usuario
-      setUserStats((prev) => ({
-        ...prev,
-        remainingReviews: selectedPackage.reviews,
-      }));
-
-      setReviewPermission({
-        canReview: true,
-        reason: "",
+      // Crear preferencia de pago real en Mercado Pago
+      const paymentData = await mercadoPagoService.createPaymentPreference({
+        packageId,
+        userEmail: user.email || '',
+        userId: user.uid,
+        userName: user.displayName || user.email || 'Usuario',
+        packageName: selectedPackage.name,
+        amount: selectedPackage.price,
+        currency: 'PEN'
       });
 
-      setShowPricingModal(false);
-      setError(null);
-
-      // Mostrar mensaje de éxito
-      alert(
-        `¡Compra exitosa! Ahora tienes ${selectedPackage.reviews} revisiones de CV disponibles.`
-      );
+      // Redirigir al usuario a Mercado Pago
+      if (paymentData.init_point) {
+        window.location.href = paymentData.init_point;
+      } else {
+        throw new Error("No se pudo crear el enlace de pago");
+      }
     } catch (error) {
       console.error("Error creating payment:", error);
       setError("Error al procesar la compra. Por favor, intenta nuevamente.");

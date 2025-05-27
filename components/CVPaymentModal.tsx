@@ -13,14 +13,13 @@ interface CVPaymentModalProps {
 export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }: CVPaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   
-  // Paquetes simples de análisis de CV
   const packages = [
     {
       id: 'cv_1',
       name: 'Análisis Básico',
       price: 4,
       revisions: 1,
-      description: '1 análisis de CV',
+      description: 'Ideal para una revisión rápida y concisa de tu CV.',
       popular: false
     },
     {
@@ -28,7 +27,7 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
       name: 'Análisis Premium',
       price: 7,
       revisions: 3,
-      description: '3 análisis de CV',
+      description: 'Múltiples revisiones para perfeccionar tu CV a detalle.',
       popular: true
     },
     {
@@ -36,7 +35,7 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
       name: 'Análisis Profesional',
       price: 10,
       revisions: 6,
-      description: '6 análisis de CV',
+      description: 'El paquete completo para una preparación exhaustiva.',
       popular: false
     }
   ];
@@ -70,7 +69,6 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
 
       const preference = await response.json();
       
-      // Redirigir a MercadoPago
       window.location.href = preference.sandbox_init_point || preference.init_point;
     } catch (error) {
       console.error('Error processing payment:', error);
@@ -84,64 +82,61 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
+      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">Comprar Análisis de CV</h3>
-            <p className="text-gray-600">Análisis profesional con IA</p>
+            <h3 className="text-xl font-semibold text-gray-900">Análisis de CV Premium</h3>
+            <p className="text-sm text-gray-500 mt-1">Elige el plan que mejor se adapte a tus necesidades</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-colors"
           >
-            <X className="h-6 w-6 text-gray-400" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Contenido */}
         <div className="p-6">
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-4">
             {packages.map((pkg) => (
               <div
                 key={pkg.id}
-                className={`relative border-2 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg ${
+                className={`relative border rounded-xl p-5 flex flex-col transition-all duration-200 hover:shadow-md ${
                   pkg.popular 
-                    ? 'border-[#028bbf] bg-gradient-to-b from-[#028bbf]/5 to-transparent' 
-                    : 'border-gray-200 hover:border-[#028bbf]/50'
+                    ? 'border-[#028bbf] bg-gradient-to-b from-blue-50/50 to-white' 
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 {pkg.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-[#028bbf] text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                      <Star className="h-4 w-4" />
+                    <div className="bg-[#028bbf] text-white text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-current" />
                       Más Popular
                     </div>
                   </div>
                 )}
 
-                <div className="text-center mb-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">{pkg.name}</h4>
-                  <div className="text-3xl font-bold text-[#028bbf] mb-2">
-                    S/ {pkg.price}
+                <div className="text-center mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">{pkg.name}</h4>
+                  <div className="mb-3">
+                    <span className="text-3xl font-bold text-[#028bbf]">S/ {pkg.price}</span>
                   </div>
-                  <p className="text-gray-600 text-sm">{pkg.description}</p>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">{pkg.revisions}</span> análisis incluido{pkg.revisions > 1 ? 's' : ''}
+                  </div>
                 </div>
 
-                <div className="text-center mb-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <span className="text-2xl font-bold text-gray-900">{pkg.revisions}</span>
-                    <p className="text-sm text-gray-600">análisis incluidos</p>
-                  </div>
-                </div>
+                <p className="text-sm text-gray-600 mb-6 text-center flex-grow">{pkg.description}</p>
 
                 <button
                   onClick={() => handlePayment(pkg)}
                   disabled={isLoading}
-                  className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
                     pkg.popular
-                      ? 'bg-[#028bbf] hover:bg-[#027ba8] text-white shadow-lg hover:shadow-xl'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-900 hover:text-[#028bbf]'
+                      ? 'bg-[#028bbf] hover:bg-[#027ba8] text-white shadow-sm'
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {isLoading ? (
@@ -149,23 +144,23 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
                   ) : (
                     <CreditCard className="h-4 w-4" />
                   )}
-                  {isLoading ? 'Procesando...' : 'Pagar con MercadoPago'}
+                  {isLoading ? 'Procesando...' : 'Seleccionar Plan'}
                 </button>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Footer */}
-          <div className="mt-8 text-center">
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-4">
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Pago seguro
-              </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Revisiones instantáneas
-              </div>
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+          <div className="flex items-center justify-center gap-x-8 text-xs text-gray-500">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              Pago 100% seguro
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              Resultados instantáneos
             </div>
           </div>
         </div>

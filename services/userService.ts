@@ -1,14 +1,16 @@
 import { db } from '../firebase/config';
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
+import { User as AuthUser } from 'firebase/auth';
+import {
+  doc,
+  getDoc,
+  setDoc,
   updateDoc,
   collection,
   query,
   where,
   getDocs
 } from 'firebase/firestore';
+import { UserCVProfile, cvReviewService } from './cvReviewService';
 
 export interface UserProfile {
   uid: string;
@@ -18,16 +20,20 @@ export interface UserProfile {
   location?: string;
   phone?: string;
   bio?: string;
-  photoURL?: string;
+  photoURL?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface UserStats {
   cvAnalyzesUsed: number;
-  cvAnalyzesTotal: number;
-  subscriptionType: 'free' | 'premium';
-  subscriptionExpiry?: Date;
+  cvAnalyzesTotal: number; // El "pool" total que el usuario tuvo/tiene (usadas + restantes)
+  cvAnalyzesRemaining: number; // Cuántas le quedan realmente
+  subscriptionType: 'free' | 'premium' | string; // 'premium' si tiene paquetes activos con revisiones
+  // Otros campos que puedas tener para estadísticas generales
+  cvsCreated?: number;
+  applicationsSent?: number;
+  trainingsCompleted?: number;
 }
 
 export class UserService {
@@ -40,7 +46,7 @@ export class UserService {
   static async getUserProfile(uid: string): Promise<UserProfile | null> {
     try {
       const userDoc = await getDoc(doc(db, this.USERS_COLLECTION, uid));
-      
+
       if (userDoc.exists()) {
         const data = userDoc.data();
         return {
@@ -50,7 +56,7 @@ export class UserService {
           updatedAt: data.updatedAt?.toDate() || new Date(),
         } as UserProfile;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Error al obtener el perfil del usuario:', error);
@@ -65,7 +71,7 @@ export class UserService {
     try {
       const userDocRef = doc(db, this.USERS_COLLECTION, uid);
       const userDoc = await getDoc(userDocRef);
-      
+
       const updateData = {
         ...profileData,
         updatedAt: new Date(),
@@ -91,37 +97,78 @@ export class UserService {
   /**
    * Obtiene las estadísticas del usuario
    */
-  static async getUserStats(uid: string): Promise<UserStats> {
+  public static async getUserStats(user: AuthUser): Promise<UserStats> {
     try {
-      const statsDoc = await getDoc(doc(db, this.USER_STATS_COLLECTION, uid));
-      
-      if (statsDoc.exists()) {
-        const data = statsDoc.data();
-        return {
-          cvAnalyzesUsed: data.cvAnalyzesUsed || 0,
-          cvAnalyzesTotal: data.cvAnalyzesTotal || 3, // 3 análisis gratis por defecto
-          subscriptionType: data.subscriptionType || 'free',
-          subscriptionExpiry: data.subscriptionExpiry?.toDate(),
-        };
-      } else {
-        // Crear estadísticas por defecto para nuevo usuario
-        const defaultStats: UserStats = {
-          cvAnalyzesUsed: 0,
-          cvAnalyzesTotal: 3,
-          subscriptionType: 'free',
-        };
-        
-        await setDoc(doc(db, this.USER_STATS_COLLECTION, uid), {
-          ...defaultStats,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-        
-        return defaultStats;
+      const profile: UserCVProfile = await cvReviewService.getUserProfile(user);
+
+      const usedFreeReview = profile.freeReviewUsed;
+      const purchasedReviewsRemaining = profile.remainingReviews > 0 ? profile.remainingReviews : 0; // Asegurar que no sea negativo si no hay ilimitado
+
+      let actualCvAnalyzesRemaining = purchasedReviewsRemaining;
+      if (!usedFreeReview) {
+        actualCvAnalyzesRemaining += 1; // Añadir la gratuita si no se ha usado
       }
+
+      const actualCvAnalyzesUsed = profile.totalReviews;
+      const actualCvAnalyzesTotal = actualCvAnalyzesUsed + actualCvAnalyzesRemaining;
+
+      let actualSubscriptionType: 'free' | 'premium' = 'free';
+      if (
+        profile.purchasedPackages &&
+        profile.purchasedPackages.some(
+          (pkg: {
+        status: string;
+        reviewsRemaining: number;
+        reviewsIncluded: number;
+          }) =>
+        pkg.status === 'approved' &&
+        (pkg.reviewsRemaining > 0 || pkg.reviewsIncluded === -1)
+        )
+      ) {
+        // Considerar un paquete ilimitado (reviewsIncluded === -1) como premium
+        // y si tiene revisiones restantes de un paquete finito.
+        actualSubscriptionType = 'premium';
+        if (
+          profile.purchasedPackages.some(
+        (pkg: {
+          status: string;
+          reviewsRemaining: number;
+          reviewsIncluded: number;
+        }) =>
+          pkg.status === 'approved' && pkg.reviewsIncluded === -1
+          )
+        ) {
+          // Si es ilimitado, las restantes podrían ser un número muy alto o un string "Ilimitadas"
+          // Por ahora, la UI del perfil maneja números. Si es ilimitado, podrías poner un número grande.
+          // O modificar la UI para mostrar "Ilimitadas".
+          // Para este ejemplo, si es ilimitado, remainingReviews podría ser un proxy (ej. 999) desde cvReviewService.
+        }
+      } else if (purchasedReviewsRemaining > 0) {
+        actualSubscriptionType = 'premium';
+      }
+
+
+      // Aquí puedes agregar la lógica para obtener otras estadísticas si es necesario
+      // const otherStats = await getOtherUserStats(user.uid);
+
+      return {
+        cvAnalyzesUsed: actualCvAnalyzesUsed,
+        cvAnalyzesTotal: actualCvAnalyzesTotal,
+        cvAnalyzesRemaining: actualCvAnalyzesRemaining,
+        subscriptionType: actualSubscriptionType,
+        // cvsCreated: otherStats?.cvsCreated || 0, // Ejemplo
+        // applicationsSent: otherStats?.applicationsSent || 0, // Ejemplo
+        // trainingsCompleted: otherStats?.trainingsCompleted || 0, // Ejemplo
+      };
     } catch (error) {
-      console.error('Error al obtener las estadísticas del usuario:', error);
-      throw error;
+      console.error("Error fetching user stats:", error);
+      // Devolver un estado por defecto o lanzar el error
+      return {
+        cvAnalyzesUsed: 0,
+        cvAnalyzesTotal: 0,
+        cvAnalyzesRemaining: 0,
+        subscriptionType: 'free',
+      };
     }
   }
 
@@ -131,7 +178,7 @@ export class UserService {
   static async updateUserStats(uid: string, stats: Partial<UserStats>): Promise<void> {
     try {
       const statsDocRef = doc(db, this.USER_STATS_COLLECTION, uid);
-      
+
       await updateDoc(statsDocRef, {
         ...stats,
         updatedAt: new Date(),
@@ -141,22 +188,20 @@ export class UserService {
       throw error;
     }
   }
-
   /**
    * Incrementa el uso de análisis de CV
    */
-  static async incrementCVAnalysis(uid: string): Promise<boolean> {
+  static async incrementCVAnalysis(user: AuthUser): Promise<boolean> {
     try {
-      const stats = await this.getUserStats(uid);
-      
+      const stats = await this.getUserStats(user);
+
       if (stats.cvAnalyzesUsed >= stats.cvAnalyzesTotal) {
         return false; // No tiene análisis disponibles
       }
-      
-      await this.updateUserStats(uid, {
-        cvAnalyzesUsed: stats.cvAnalyzesUsed + 1,
-      });
-      
+
+      // Usar cvReviewService para consumir una revisión
+      await cvReviewService.consumeReview(user);
+
       return true;
     } catch (error) {
       console.error('Error al incrementar el uso de análisis:', error);
@@ -173,10 +218,10 @@ export class UserService {
         collection(db, this.USERS_COLLECTION),
         where('university', '==', university)
       );
-      
+
       const querySnapshot = await getDocs(q);
       const users: UserProfile[] = [];
-      
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         users.push({
@@ -186,20 +231,19 @@ export class UserService {
           updatedAt: data.updatedAt?.toDate() || new Date(),
         } as UserProfile);
       });
-      
+
       return users;
     } catch (error) {
       console.error('Error al buscar usuarios por universidad:', error);
       throw error;
     }
   }
-
   /**
    * Verifica si el usuario puede realizar un análisis de CV
    */
-  static async canAnalyzeCV(uid: string): Promise<boolean> {
+  static async canAnalyzeCV(user: AuthUser): Promise<boolean> {
     try {
-      const stats = await this.getUserStats(uid);
+      const stats = await this.getUserStats(user);
       return stats.cvAnalyzesUsed < stats.cvAnalyzesTotal;
     } catch (error) {
       console.error('Error al verificar disponibilidad de análisis:', error);
@@ -216,27 +260,25 @@ export class UserService {
         collection(db, this.USERS_COLLECTION),
         where('email', '==', email)
       );
-      
+
       const querySnapshot = await getDocs(q);
-      
+
       if (!querySnapshot.empty) {
         return querySnapshot.docs[0].id;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Error al buscar usuario por email:', error);
       throw error;
     }
-  }
-
-  /**
+  }  /**
    * Añade análisis adicionales al usuario (compra) - acepta UID o email
    */
   static async addCVAnalyses(userIdOrEmail: string, amount: number): Promise<void> {
     try {
       let uid = userIdOrEmail;
-      
+
       // Si parece ser un email, buscar el UID
       if (userIdOrEmail.includes('@')) {
         const foundUid = await this.getUserByEmail(userIdOrEmail);
@@ -245,13 +287,21 @@ export class UserService {
         }
         uid = foundUid;
       }
+
+      // Este método se usa principalmente para compras, por lo que actualiza directamente
+      // las estadísticas sin depender de cvReviewService
+      const statsDocRef = doc(db, this.USER_STATS_COLLECTION, uid);
+      const statsDoc = await getDoc(statsDocRef);
       
-      const stats = await this.getUserStats(uid);
-      
+      let currentTotal = 0;
+      if (statsDoc.exists()) {
+        currentTotal = statsDoc.data().cvAnalyzesTotal || 0;
+      }
+
       await this.updateUserStats(uid, {
-        cvAnalyzesTotal: stats.cvAnalyzesTotal + amount,
+        cvAnalyzesTotal: currentTotal + amount,
       });
-      
+
       console.log(`✅ Añadidos ${amount} análisis al usuario ${userIdOrEmail}`);
     } catch (error) {
       console.error('Error al añadir análisis adicionales:', error);

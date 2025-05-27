@@ -7,8 +7,7 @@ import Link from "next/link";
 import Avatar from "../../components/Avatar";
 import ClientOnly from "../../components/ClientOnly";
 import { cvReviewService } from "../../services/cvReviewService";
-import { cvTestData } from "../../services/cvTestDataService";
-import { trackDashboardView, trackTestDataCreation } from "../../utils/analytics";
+import { trackDashboardView } from "../../utils/analytics";
 import { 
   User, 
   FileText, 
@@ -65,13 +64,11 @@ export default function DashboardPage() {
     await logout();
     router.push('/');
   };
-
-  // Función para testing en desarrollo
-  const handleTestData = async () => {
-    if (process.env.NODE_ENV === 'development' && user) {
+  // Función para recargar estadísticas
+  const handleRefreshStats = async () => {
+    if (user) {
+      setStatsLoading(true);
       try {
-        await cvTestData.createTestData(user);
-        // Recargar estadísticas
         const stats = await cvReviewService.getUserStats(user);
         setCvStats({
           totalReviews: stats.totalReviews,
@@ -79,10 +76,10 @@ export default function DashboardPage() {
           freeReviewUsed: stats.freeReviewUsed,
           lastReviewDate: stats.lastReviewDate || undefined
         });
-        alert('✅ Datos de prueba creados exitosamente');
       } catch (error) {
-        console.error('Error creando datos de prueba:', error);
-        alert('❌ Error creando datos de prueba');
+        console.error('Error loading CV stats:', error);
+      } finally {
+        setStatsLoading(false);
       }
     }
   };
@@ -149,24 +146,26 @@ export default function DashboardPage() {
           <p className="text-gray-600">
             Bienvenido a tu panel de control. Aquí puedes gestionar tu perfil y acceder a todas las herramientas de empleabilidad.
           </p>
-          
-          {/* Botón de testing solo en desarrollo */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-yellow-800">Modo Desarrollo</h3>
-                  <p className="text-sm text-yellow-700">Crear datos de prueba para testing del sistema de CV</p>
-                </div>
-                <button
-                  onClick={handleTestData}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
-                >
-                  🧪 Crear Datos Test
-                </button>
+            {/* Panel de información útil */}
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-blue-800">Análisis de CV</h3>
+                <p className="text-sm text-blue-700">
+                  {cvStats.remainingReviews > 0 
+                    ? `Tienes ${cvStats.remainingReviews} análisis disponibles`
+                    : 'Necesitas comprar análisis adicionales para revisar más CVs'
+                  }
+                </p>
               </div>
+              <Link 
+                href="/analizar-cv"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              >
+                Analizar CV
+              </Link>
             </div>
-          )}
+          </div>
         </div>{/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">

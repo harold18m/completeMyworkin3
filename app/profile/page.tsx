@@ -78,10 +78,8 @@ export default function ProfilePage() {
         setLocation(profile.location || "");
         setPhone(profile.phone || "");
         setBio(profile.bio || "");
-      }
-
-      // Cargar estadísticas del usuario
-      const stats = await UserService.getUserStats(user.uid);
+      }      // Cargar estadísticas del usuario
+      const stats = await UserService.getUserStats(user);
       setUserStats(stats);
       
     } catch (error) {
@@ -117,8 +115,7 @@ export default function ProfilePage() {
           university: university.trim(),
           location: location.trim(),
           phone: phone.trim(),
-          bio: bio.trim(),
-          photoURL: user.photoURL || undefined,
+          bio: bio.trim(), // Cambiado de undefined a null
         });
 
         // Recargar datos del perfil
@@ -254,7 +251,7 @@ export default function ProfilePage() {
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent text-gray-900"
                         placeholder="Tu nombre completo"
                       />
                     ) : (
@@ -284,8 +281,8 @@ export default function ProfilePage() {
                         type="text"
                         value={university}
                         onChange={(e) => setUniversity(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent"
-                        placeholder="Tu universidad"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent text-gray-900"
+                        placeholder="Ej: Universidad Nacional"
                       />
                     ) : (
                       <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -304,8 +301,8 @@ export default function ProfilePage() {
                         type="text"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent"
-                        placeholder="Tu ciudad, país"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent text-gray-900"
+                        placeholder="Ej: Lima, Perú"
                       />
                     ) : (
                       <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -324,8 +321,8 @@ export default function ProfilePage() {
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent"
-                        placeholder="Tu número de teléfono"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent text-gray-900"
+                        placeholder="Ej: +51 987654321"
                       />
                     ) : (
                       <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -356,7 +353,7 @@ export default function ProfilePage() {
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={4}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent text-gray-900"
                       placeholder="Cuéntanos un poco sobre ti..."
                     />
                   ) : (
@@ -393,20 +390,20 @@ export default function ProfilePage() {
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent text-gray-900"
                       placeholder="Mínimo 6 caracteres"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Confirmar contraseña
+                      Confirmar nueva contraseña
                     </label>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:border-transparent text-gray-900"
                       placeholder="Repite la nueva contraseña"
                     />
                   </div>
@@ -514,20 +511,19 @@ export default function ProfilePage() {
                       <span className="text-sm font-medium text-gray-900">
                         {userStats.cvAnalyzesUsed} / {userStats.cvAnalyzesTotal}
                       </span>
-                    </div>
-                    <div className="flex justify-between">
+                    </div>                    <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Análisis restantes</span>
                       <span className={`text-sm font-medium ${
-                        userStats.cvAnalyzesTotal - userStats.cvAnalyzesUsed > 0 
+                        userStats.cvAnalyzesRemaining > 0 
                           ? 'text-green-600' 
                           : 'text-red-600'
                       }`}>
-                        {userStats.cvAnalyzesTotal - userStats.cvAnalyzesUsed}
+                        {userStats.cvAnalyzesRemaining}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Tipo de cuenta</span>
-                      <span className={`text-sm font-medium px-2 py-1 rounded-full text-xs ${
+                      <span className={`text-sm font-medium px-2 py-1 rounded-full ${
                         userStats.subscriptionType === 'premium' 
                           ? 'bg-yellow-100 text-yellow-800' 
                           : 'bg-gray-100 text-gray-800'
@@ -536,22 +532,29 @@ export default function ProfilePage() {
                       </span>
                     </div>
                   </div>
+                )}                {/* Estadísticas adicionales se mostrarán cuando estén disponibles */}
+                {userStats && (userStats.cvsCreated || userStats.applicationsSent || userStats.trainingsCompleted) && (
+                  <div className="pt-4 space-y-3 border-t border-gray-100">
+                    {userStats.cvsCreated && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">CVs creados</span>
+                        <span className="text-sm font-medium text-gray-900">{userStats.cvsCreated}</span>
+                      </div>
+                    )}
+                    {userStats.applicationsSent && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Postulaciones</span>
+                        <span className="text-sm font-medium text-gray-900">{userStats.applicationsSent}</span>
+                      </div>
+                    )}
+                    {userStats.trainingsCompleted && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Entrenamientos</span>
+                        <span className="text-sm font-medium text-gray-900">{userStats.trainingsCompleted}</span>
+                      </div>
+                    )}
+                  </div>
                 )}
-
-                <div className="pt-4 space-y-3 border-t border-gray-100">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">CVs creados</span>
-                    <span className="text-sm font-medium text-gray-900">2</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Postulaciones</span>
-                    <span className="text-sm font-medium text-gray-900">5</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Entrenamientos</span>
-                    <span className="text-sm font-medium text-gray-900">8</span>
-                  </div>
-                </div>
               </div>
             </div>            {/* Accesos rápidos */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -566,10 +569,9 @@ export default function ProfilePage() {
                   <div className="flex items-center space-x-3">
                     <TrendingUp size={18} />
                     <span className="font-medium">Analizar CV</span>
-                  </div>
-                  {userStats && (
+                  </div>                  {userStats && (
                     <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                      {userStats.cvAnalyzesTotal - userStats.cvAnalyzesUsed} restantes
+                      {userStats.cvAnalyzesRemaining} restantes
                     </span>
                   )}
                 </Link>
