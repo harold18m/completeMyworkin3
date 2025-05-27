@@ -189,27 +189,29 @@ export default function HistorialCVPage() {
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#028bbf] mx-auto mb-4"></div>
               <p className="text-gray-600">Cargando historial de CV...</p>
-            </div>
-          ) : filteredReviews.length === 0 ? (
-            <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {filter === 'all' ? 'No hay revisiones de CV' : `No hay revisiones ${filter === 'completed' ? 'completadas' : 'en proceso'}`}
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {filter === 'all' 
-                  ? 'Comienza analizando tu primer CV para obtener retroalimentación profesional.'
-                  : 'Cambia el filtro para ver otras revisiones o realiza un nuevo análisis.'
-                }
-              </p>
-              <Link
-                href="/analizar-cv"
-                className="inline-flex items-center space-x-2 bg-[#028bbf] hover:bg-[#027ba8] text-white px-6 py-3 rounded-lg font-medium transition"
-              >
-                <TrendingUp size={16} />
-                <span>Analizar CV</span>
-              </Link>
-            </div>
+            </div>          ) : filteredReviews.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-8 sm:px-8 sm:py-12 text-center">
+                <div className="max-w-sm mx-auto">
+                  <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-base sm:text-lg font-medium text-gray-700 mb-2">
+                    {filter === 'all' ? 'Sin revisiones' : `Sin revisiones ${filter === 'completed' ? 'completadas' : 'en proceso'}`}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                    {filter === 'all' 
+                      ? 'Analiza tu primer CV para obtener retroalimentación profesional.'
+                      : 'Cambia el filtro para ver otras revisiones.'
+                    }
+                  </p>
+                  <Link
+                    href="/analizar-cv"
+                    className="inline-flex items-center justify-center space-x-2 bg-[#028bbf] hover:bg-[#027ba8] text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#028bbf] focus:ring-offset-2"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Analizar CV</span>
+                  </Link>
+                </div>
+              </div>            </div>
           ) : (
             <div className="space-y-4">
               {filteredReviews.map((review) => (

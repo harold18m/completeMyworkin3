@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { analyzeCV, uploadCV } from "../../src/utils/cvAnalyzer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -16,9 +17,10 @@ import { Loader2, Upload, FileText, Crown, AlertCircle } from "lucide-react";
 import Navbar from "@/components/navbar";
 import { useAuth } from "../../hooks/useAuth";
 import { cvReviewService, CV_PACKAGES } from "../../services/cvReviewService";
+import { mercadoPagoService } from "../../services/mercadoPagoService";
 import CVPricingModal from "../../components/CVPricingModal";
 import CVPaymentModal from "../../components/CVPaymentModal";
-import { mercadoPagoService } from "../../services/mercadoPagoService";
+import CVAccountStatus from "../../components/CVAccountStatus";
 
 export default function AnalizarCVPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -30,7 +32,7 @@ export default function AnalizarCVPage() {
   const { user } = useAuth();
   const [freeUsed, setFreeUsed] = useState(false);
   const [longWait, setLongWait] = useState(false);
-  const [veryLongWait, setVeryLongWait] = useState(false);  // Nuevos estados para el sistema persistente
+  const [veryLongWait, setVeryLongWait] = useState(false); // Nuevos estados para el sistema persistente
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [userStats, setUserStats] = useState({
@@ -38,6 +40,8 @@ export default function AnalizarCVPage() {
     remainingReviews: 0,
     freeReviewUsed: false,
     lastReviewDate: undefined as Date | undefined,
+    canUseService: true, // Inicialmente true para permitir carga
+    nextReviewType: "free" as "free" | "paid" | "none",
   });
   const [reviewPermission, setReviewPermission] = useState({
     canReview: false,
@@ -52,10 +56,12 @@ export default function AnalizarCVPage() {
       const used = localStorage.getItem("cv_analysis_used");
       setFreeUsed(used === "true");
     }
-  }, [user]);  const loadUserData = async () => {
+  }, [user]);
+  const loadUserData = async () => {
     if (!user) return;
 
-    try {      // Cargar datos reales del usuario
+    try {
+      // Cargar datos reales del usuario
       const stats = await cvReviewService.getUserStats(user);
       const permission = await cvReviewService.canUserReview(user);
 
@@ -64,13 +70,20 @@ export default function AnalizarCVPage() {
         remainingReviews: stats.remainingReviews,
         freeReviewUsed: stats.freeReviewUsed,
         lastReviewDate: stats.lastReviewDate || undefined,
+        canUseService: stats.canUseService,
+        nextReviewType: stats.nextReviewType,
       });
 
       setReviewPermission(permission);
       setFreeUsed(stats.freeReviewUsed);
-
     } catch (error) {
       console.error("Error loading user data:", error);
+      // En caso de error, permitir al menos intentar una revisión
+      setUserStats((prev) => ({
+        ...prev,
+        canUseService: true,
+        nextReviewType: "free",
+      }));
     }
   };
 
@@ -148,55 +161,58 @@ export default function AnalizarCVPage() {
       return;
     } // Para usuarios autenticados, verificar si pueden hacer revisión
     if (user) {
-      if (!reviewPermission.canReview && userStats.remainingReviews === 0) {
-        setShowPaymentModal(true);
+      if (!userStats.canUseService) {
+        setShowPricingModal(true);
         return;
       }
-    }    setLoading(true);
+    }
+    setLoading(true);
     setError(null);
     setResult(null);
     setLongWait(false);
     setVeryLongWait(false);
-    
+
     let currentReviewId: string | null = null;
-    
+
     try {
       // 1. Subir el archivo CV
       const cvUrl = await uploadCV(file);
-      
+
       // 2. Crear la revisión en el sistema (solo para usuarios autenticados)
       if (user) {
         currentReviewId = await cvReviewService.createReview(user, {
           fileName: file.name,
           position: puestoPostular,
-          status: 'processing',
-          fileUrl: cvUrl
+          status: "processing",
+          fileUrl: cvUrl,
         });
         setReviewId(currentReviewId);
-        
+
         // 3. Consumir una revisión del usuario
         await cvReviewService.consumeReview(user);
-        
+
         // 4. Actualizar estadísticas locales
         await loadUserData();
       }
-      
+
       // 5. Procesar el análisis real del CV
       const analysisResult = await analyzeCV(cvUrl, puestoPostular);
-      
+
       // 6. Actualizar la revisión con el resultado (solo para usuarios autenticados)
       if (user && currentReviewId) {
         // Extraer la URL del resultado del análisis
-        const resultUrl = analysisResult?.extractedData?.analysisResults?.pdf_url || cvUrl;
-        
+        const resultUrl =
+          analysisResult?.extractedData?.analysisResults?.pdf_url || cvUrl;
+
         await cvReviewService.updateReviewResult(currentReviewId, {
           resultUrl: resultUrl,
-          status: 'completed'
+          status: "completed",
         });
       }
-      
+
       // 7. Mostrar el resultado al usuario
-      const finalResultUrl = analysisResult?.extractedData?.analysisResults?.pdf_url || cvUrl;
+      const finalResultUrl =
+        analysisResult?.extractedData?.analysisResults?.pdf_url || cvUrl;
       setResult(finalResultUrl);
 
       // Marcar como usado solo después de un análisis exitoso para usuarios no logueados
@@ -208,16 +224,19 @@ export default function AnalizarCVPage() {
       const errorMsg =
         error instanceof Error ? error.message : "Error al analizar el CV";
       setError(errorMsg);
-      
+
       // Si hubo error y se creó una revisión, actualizarla como fallida
       if (user && currentReviewId) {
         try {
           await cvReviewService.updateReviewResult(currentReviewId, {
-            status: 'failed',
-            errorMessage: errorMsg
+            status: "failed",
+            errorMessage: errorMsg,
           });
         } catch (updateError) {
-          console.error('Error actualizando estado de revisión fallida:', updateError);
+          console.error(
+            "Error actualizando estado de revisión fallida:",
+            updateError
+          );
         }
       }
     } finally {
@@ -244,13 +263,15 @@ export default function AnalizarCVPage() {
       console.error("Error processing purchase:", error);
       setError("Error al procesar la compra. Por favor, contacta soporte.");
     }
-  };  const handleSelectPackage = async (packageId: string) => {
+  };
+  const handleSelectPackage = async (packageId: string) => {
     if (!user) {
       setError("Debes iniciar sesión para comprar un paquete");
       return;
-    }    try {
+    }
+    try {
       // Buscar información del paquete
-      const selectedPackage = CV_PACKAGES.find(pkg => pkg.id === packageId);
+      const selectedPackage = CV_PACKAGES.find((pkg) => pkg.id === packageId);
       if (!selectedPackage) {
         throw new Error("Paquete no encontrado");
       }
@@ -258,12 +279,12 @@ export default function AnalizarCVPage() {
       // Crear preferencia de pago real en Mercado Pago
       const paymentData = await mercadoPagoService.createPaymentPreference({
         packageId,
-        userEmail: user.email || '',
+        userEmail: user.email || "",
         userId: user.uid,
-        userName: user.displayName || user.email || 'Usuario',
+        userName: user.displayName || user.email || "Usuario",
         packageName: selectedPackage.name,
         amount: selectedPackage.price,
-        currency: 'PEN'
+        currency: "PEN",
       });
 
       // Redirigir al usuario a Mercado Pago
@@ -297,27 +318,13 @@ export default function AnalizarCVPage() {
             <Card className="shadow-none border-0">
               <CardContent>
                 <div className="space-y-6">
-                  {/* Información para usuarios autenticados */}
+                  {" "}
+                  {/* Estado de la cuenta para usuarios autenticados */}
                   {user && (
-                    <Alert className="mb-6 border-blue-200 bg-blue-50">
-                      <Crown className="h-4 w-4 text-blue-600" />
-                      <AlertTitle className="text-blue-800">
-                        Estado de tu cuenta
-                      </AlertTitle>
-                      <AlertDescription className="text-blue-700">
-                        <div className="space-y-1">
-                          <p>Revisiones realizadas: {userStats.totalReviews}</p>
-                          <p>
-                            Revisiones disponibles: {userStats.remainingReviews}
-                          </p>
-                          {userStats.freeReviewUsed && (
-                            <p className="text-sm text-blue-600">
-                              ✓ Revisión gratuita utilizada
-                            </p>
-                          )}
-                        </div>
-                      </AlertDescription>
-                    </Alert>
+                    <CVAccountStatus
+                      userStats={userStats}
+                      onPurchaseClick={() => setShowPaymentModal(true)}
+                    />
                   )}
                   {/* Alerta para usuarios no logueados que ya usaron su análisis gratuito */}
                   {!user && freeUsed && (
@@ -445,27 +452,8 @@ export default function AnalizarCVPage() {
                         <FileText className="mr-2 h-4 w-4" />
                         Analizar CV
                       </>
-                    )}
+                    )}{" "}
                   </Button>
-                  {/* Botón para compra cuando no hay revisiones */}
-                  {user && userStats.remainingReviews === 0 && (
-                    <div className="mt-4 p-4 bg-gradient-to-r from-[#028bbf]/10 to-[#0369a1]/10 border border-[#028bbf]/20 rounded-lg">
-                      <p className="text-[#028bbf] text-sm mb-3 font-medium">
-                        💎 ¡Desbloquea análisis premium de CV!
-                      </p>
-                      <p className="text-gray-600 text-xs mb-3">
-                        Obtén análisis detallados con recomendaciones
-                        personalizadas de IA
-                      </p>
-                      <Button
-                        onClick={() => setShowPaymentModal(true)}
-                        className="w-full bg-gradient-to-r from-[#028bbf] to-[#0369a1] hover:from-[#027ba8] hover:to-[#1e40af]"
-                      >
-                        <Crown className="mr-2 h-4 w-4" />
-                        Ver Planes de Análisis
-                      </Button>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>

@@ -7,7 +7,7 @@
 			"command": "pnpm",
 			"args": [
 				"run",
-				"dev:3002"
+				"dev"
 			],
 			"group": "build",
 			"isBackground": true,

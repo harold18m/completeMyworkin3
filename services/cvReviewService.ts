@@ -369,16 +369,29 @@ export class CVReviewService {
       console.error('Error agregando revisiones compradas:', error);
       throw new Error('Error al agregar revisiones al usuario');
     }
-  }
-  // Obtener estadísticas simplificadas del usuario para la interfaz
+  }  // Obtener estadísticas simplificadas del usuario para la interfaz
   async getUserStats(user: User): Promise<{
     totalReviews: number;
     remainingReviews: number;
     freeReviewUsed: boolean;
     lastReviewDate?: Date;
+    canUseService: boolean;
+    nextReviewType: 'free' | 'paid' | 'none';
   }> {
     try {
       const profile = await this.getUserProfile(user);
+      
+      // Determinar si puede usar el servicio y qué tipo de revisión sería la siguiente
+      let canUseService = false;
+      let nextReviewType: 'free' | 'paid' | 'none' = 'none';
+      
+      if (!profile.freeReviewUsed) {
+        canUseService = true;
+        nextReviewType = 'free';
+      } else if (profile.remainingReviews > 0) {
+        canUseService = true;
+        nextReviewType = 'paid';
+      }
       
       // TEMPORAL: Sin orderBy mientras se construye el índice
       let lastReviewDate: Date | undefined;
@@ -386,7 +399,7 @@ export class CVReviewService {
         const lastReviewQuery = query(
           collection(db, 'cvReviews'),
           where('userId', '==', user.uid),
-          limit(10) // Obtener las últimas 10 y ordenar en memoria
+          limit(5) // Reducir para mejor performance
         );
         
         const lastReviewSnapshot = await getDocs(lastReviewQuery);
@@ -406,25 +419,28 @@ export class CVReviewService {
           }
         }
       } catch (indexError) {
-        console.log('Índice aún construyéndose, usando valores por defecto para fecha');
-        // No hacer nada, lastReviewDate quedará undefined
+        console.log('Índice en construcción, saltando fecha de última revisión');
       }
 
       return {
         totalReviews: profile.totalReviews,
         remainingReviews: profile.remainingReviews,
         freeReviewUsed: profile.freeReviewUsed,
-        lastReviewDate
+        lastReviewDate,
+        canUseService,
+        nextReviewType
       };
     } catch (error) {
       console.error('Error obteniendo estadísticas:', error);
       return {
         totalReviews: 0,
         remainingReviews: 0,
-        freeReviewUsed: false
+        freeReviewUsed: false,
+        canUseService: false,
+        nextReviewType: 'none'
       };
     }
-  }  // Obtener historial de revisiones del usuario
+  }// Obtener historial de revisiones del usuario
   async getUserReviews(userId: string): Promise<CVReview[]> {
     try {
       // TEMPORAL: Sin orderBy mientras se construye el índice
