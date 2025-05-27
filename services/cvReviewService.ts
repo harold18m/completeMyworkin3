@@ -370,7 +370,6 @@ export class CVReviewService {
       throw new Error('Error al agregar revisiones al usuario');
     }
   }
-
   // Obtener estadísticas simplificadas del usuario para la interfaz
   async getUserStats(user: User): Promise<{
     totalReviews: number;
@@ -381,22 +380,34 @@ export class CVReviewService {
     try {
       const profile = await this.getUserProfile(user);
       
-      // Obtener la última revisión para mostrar la fecha
-      const lastReviewQuery = query(
-        collection(db, 'cvReviews'),
-        where('userId', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(1)
-      );
-      
-      const lastReviewSnapshot = await getDocs(lastReviewQuery);
+      // TEMPORAL: Sin orderBy mientras se construye el índice
       let lastReviewDate: Date | undefined;
-      
-      if (!lastReviewSnapshot.empty) {
-        const lastReview = lastReviewSnapshot.docs[0].data();
-        if (lastReview.createdAt) {
-          lastReviewDate = lastReview.createdAt.toDate();
+      try {
+        const lastReviewQuery = query(
+          collection(db, 'cvReviews'),
+          where('userId', '==', user.uid),
+          limit(10) // Obtener las últimas 10 y ordenar en memoria
+        );
+        
+        const lastReviewSnapshot = await getDocs(lastReviewQuery);
+        if (!lastReviewSnapshot.empty) {
+          // Ordenar en memoria por fecha de creación
+          const reviews = lastReviewSnapshot.docs
+            .map(doc => doc.data())
+            .filter(review => review.createdAt)
+            .sort((a, b) => {
+              const dateA = a.createdAt?.toDate() || new Date(0);
+              const dateB = b.createdAt?.toDate() || new Date(0);
+              return dateB.getTime() - dateA.getTime();
+            });
+          
+          if (reviews.length > 0) {
+            lastReviewDate = reviews[0].createdAt.toDate();
+          }
         }
+      } catch (indexError) {
+        console.log('Índice aún construyéndose, usando valores por defecto para fecha');
+        // No hacer nada, lastReviewDate quedará undefined
       }
 
       return {
@@ -413,22 +424,28 @@ export class CVReviewService {
         freeReviewUsed: false
       };
     }
-  }
-  // Obtener historial de revisiones del usuario
+  }  // Obtener historial de revisiones del usuario
   async getUserReviews(userId: string): Promise<CVReview[]> {
     try {
+      // TEMPORAL: Sin orderBy mientras se construye el índice
       const reviewsQuery = query(
         collection(db, 'cvReviews'),
         where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
         limit(50)
       );
       
       const reviewsSnapshot = await getDocs(reviewsQuery);
-      return reviewsSnapshot.docs.map(doc => ({
+      const reviews = reviewsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as CVReview[];
+
+      // Ordenar en memoria por fecha de creación (más reciente primero)
+      return reviews.sort((a, b) => {
+        const dateA = a.createdAt?.toDate() || new Date(0);
+        const dateB = b.createdAt?.toDate() || new Date(0);
+        return dateB.getTime() - dateA.getTime();
+      });
     } catch (error) {
       console.error('Error obteniendo revisiones del usuario:', error);
       throw new Error('Error al cargar el historial de revisiones');

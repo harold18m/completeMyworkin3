@@ -1,78 +1,46 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { CheckCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function PaymentSuccess() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [paymentProcessed, setPaymentProcessed] = useState(false);
 
   useEffect(() => {
-    // Redirigir después de 3 segundos
-    const timer = setTimeout(() => {
-      router.push('/analizar-cv');
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-        <div className="mb-6">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">¡Pago Exitoso!</h1>
-          <p className="text-gray-600">
-            Tu pago se ha procesado correctamente. Las revisiones de CV se han agregado a tu cuenta.
-          </p>
-        </div>
-        
-        <div className="space-y-4">
-          <button
-            onClick={() => router.push('/analizar-cv')}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
-          >
-            Analizar mi CV
-          </button>
-          
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-colors"
-          >
-            Ir al Dashboard
-          </button>
-        </div>
-        
-        <p className="text-sm text-gray-500 mt-4">
-          Serás redirigido automáticamente en 3 segundos...
-        </p>
-      </div>
-    </div>
-  );
-}
+    const processPayment = async () => {
+      if (!user) return;
+      
       try {
         const paymentId = searchParams.get('payment_id');
+        const status = searchParams.get('status');
         const externalReference = searchParams.get('external_reference');
-
-        if (!paymentId || !externalReference || !user) {
-          throw new Error('Información de pago incompleta');
-        }
-
-        // Verificar estado del pago
-        const paymentStatus = await mercadoPagoService.checkPaymentStatus(paymentId);
         
-        if (paymentStatus.status === 'approved') {
-          // Procesar la referencia externa
-          const referenceData = JSON.parse(externalReference);
-          const { packageId } = referenceData;          // Agregar revisiones al usuario
-          await cvReviewService.addPurchasedReviews(user, {
-            packageId,
-            paymentId,
-            packageName: referenceData.packageName || '',
-            reviewsIncluded: referenceData.reviewsIncluded || 0,
-            price: referenceData.price || 0
-          });
+        console.log('Procesando pago exitoso:', { 
+          paymentId, 
+          status, 
+          externalReference, 
+          user: user.email 
+        });
+        
+        if (status === 'approved' && paymentId) {
+          // Decodificar external_reference para obtener detalles
+          if (externalReference) {
+            const decoded = decodeURIComponent(externalReference);
+            const [userEmail, revisions, timestamp] = decoded.split('_');
+            console.log('Detalles del pago:', { userEmail, revisions, timestamp });
+          }
           
+          // El webhook debería haber procesado el pago automáticamente
+          // Aquí solo confirmamos que todo está bien
           setPaymentProcessed(true);
         } else {
           throw new Error('El pago no fue aprobado');
@@ -89,6 +57,16 @@ export default function PaymentSuccess() {
       processPayment();
     }
   }, [user, searchParams]);
+
+  useEffect(() => {
+    // Redirigir después de 5 segundos
+    if (paymentProcessed) {
+      const timer = setTimeout(() => {
+        router.push('/analizar-cv');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentProcessed, router]);
 
   if (!user) {
     return (
@@ -169,6 +147,9 @@ export default function PaymentSuccess() {
               Ir al Dashboard
             </Button>
           </div>
+          <p className="text-sm text-gray-500">
+            Serás redirigido automáticamente en 5 segundos...
+          </p>
         </CardContent>
       </Card>
     </div>

@@ -47,3 +47,14 @@ if (!admin.apps.length) {
 }
 
 export default admin;
+
+// Función helper para buscar usuario por email
+export async function getUserByEmail(email: string) {
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    return userRecord;
+  } catch (error) {
+    console.error('Error al buscar usuario por email:', error);
+    throw error;
+  }
+}

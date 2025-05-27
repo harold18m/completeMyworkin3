@@ -45,10 +45,21 @@ export interface CVPackage {
 export const CV_PACKAGES: CVPackage[] = [
   {
     id: 'cv_basic',
-    name: 'Paquete Básico',
-    price: 15.00,
+    name: '1 Revisión',
+    price: 4.00,
+    reviews: 1,
+    description: '1 revisión adicional de CV',    features: [
+      '1 análisis detallado',
+      'Recomendaciones específicas',
+      'Puntuación mejorada'
+    ]
+  },
+  {
+    id: 'cv_premium',
+    name: '3 Revisiones',
+    price: 7.00,
     reviews: 3,
-    description: '3 revisiones adicionales de CV',
+    description: '3 revisiones de CV - ¡Más Popular!',
     features: [
       '3 análisis detallados',
       'Recomendaciones específicas',
@@ -57,17 +68,16 @@ export const CV_PACKAGES: CVPackage[] = [
     ]
   },
   {
-    id: 'cv_premium',
-    name: 'Paquete Premium',
-    price: 25.00,
-    reviews: 10,
-    description: '10 revisiones de CV con beneficios extra',
+    id: 'cv_enterprise',
+    name: '6 Revisiones',
+    price: 10.00,
+    reviews: 6,
+    description: '6 revisiones de CV - Mejor valor',
     features: [
-      '10 análisis detallados',
+      '6 análisis detallados',
       'Recomendaciones específicas',
       'Puntuación mejorada',
       'Soporte prioritario',
-      'Plantillas premium',
       'Seguimiento de mejoras'
     ]
   },

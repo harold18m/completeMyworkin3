@@ -12,11 +12,10 @@ interface CVPaymentModalProps {
 
 export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }: CVPaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  
-  const packages = [
+    const packages = [
     {
       id: 'cv_1',
-      name: 'Análisis Básico',
+      name: '1 Revisión',
       price: 4,
       revisions: 1,
       description: 'Ideal para una revisión rápida y concisa de tu CV.',
@@ -24,7 +23,7 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
     },
     {
       id: 'cv_3',
-      name: 'Análisis Premium',
+      name: '3 Revisiones',
       price: 7,
       revisions: 3,
       description: 'Múltiples revisiones para perfeccionar tu CV a detalle.',
@@ -32,14 +31,13 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
     },
     {
       id: 'cv_6',
-      name: 'Análisis Profesional',
+      name: '6 Revisiones',
       price: 10,
       revisions: 6,
       description: 'El paquete completo para una preparación exhaustiva.',
       popular: false
     }
   ];
-
   const handlePayment = async (packageData: typeof packages[0]) => {
     if (!userEmail || !userName) {
       alert('Por favor, inicia sesión para continuar con el pago');
@@ -58,21 +56,28 @@ export default function CVPaymentModal({ isOpen, onClose, userEmail, userName }:
           title: packageData.name,
           price: packageData.price,
           quantity: 1,
-          userId: userEmail,
-          revisions: packageData.revisions
+          userId: userEmail, // Usamos email como identificador
+          revisions: packageData.revisions,
+          userEmail: userEmail
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Error al crear la preferencia de pago');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al crear la preferencia de pago');
       }
 
       const preference = await response.json();
       
-      window.location.href = preference.sandbox_init_point || preference.init_point;
+      // Redirigir a MercadoPago (usar sandbox en desarrollo)
+      const checkoutUrl = process.env.NODE_ENV === 'production' 
+        ? preference.init_point 
+        : preference.sandbox_init_point;
+        
+      window.location.href = checkoutUrl;
     } catch (error) {
       console.error('Error processing payment:', error);
-      alert('Error al procesar el pago. Por favor, intenta de nuevo.');
+      alert(`Error al procesar el pago: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setIsLoading(false);
     }
