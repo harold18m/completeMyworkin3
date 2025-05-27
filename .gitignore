@@ -3,15 +3,13 @@ node_modules/
 .next/
 .env
 .env.local
+.env.production
 
 # Firebase credentials
-firebase-adminsdk-*.json
-*-firebase-adminsdk-*.json
-service-account-*.json
+*firebase-adminsdk*.json
+serviceAccountKey.json
+firebase-service-account.json
 
-# MercadoPago credentials  
-mercadopago-*.json
-
-# General JSON credentials
-*-credentials.json
-*-private-key.json
+# Other sensitive files
+*.pem
+*.key
