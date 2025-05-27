@@ -24,15 +24,15 @@ Este proyecto utiliza Firebase Admin SDK para operaciones del lado del servidor.
 
 3. **Variables de entorno necesarias**:
    ```env
-   # Firebase Admin
-   FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
+   # Firebase Admin (usando JSON en variable de entorno)
+   FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account","project_id":"...","private_key":"...","client_email":"..."}'
    
    # Supabase
    NEXT_PUBLIC_SUPABASE_URL=tu_url_supabase
    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_key_supabase
    
    # MercadoPago
-   NEXT_PUBLIC_MP_ACCESS_TOKEN=tu_token_mp
+   MP_ACCESS_TOKEN=tu_token_mp
    NEXT_PUBLIC_MP_PUBLIC_KEY=tu_public_key_mp
    ```
 

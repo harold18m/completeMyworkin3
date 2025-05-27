@@ -165,22 +165,6 @@ export class UserService {
   }
 
   /**
-   * Añade análisis adicionales al usuario (compra)
-   */
-  static async addCVAnalyses(uid: string, amount: number): Promise<void> {
-    try {
-      const stats = await this.getUserStats(uid);
-      
-      await this.updateUserStats(uid, {
-        cvAnalyzesTotal: stats.cvAnalyzesTotal + amount,
-      });
-    } catch (error) {
-      console.error('Error al añadir análisis adicionales:', error);
-      throw error;
-    }
-  }
-
-  /**
    * Busca usuarios por universidad
    */
   static async getUsersByUniversity(university: string): Promise<UserProfile[]> {
@@ -220,6 +204,58 @@ export class UserService {
     } catch (error) {
       console.error('Error al verificar disponibilidad de análisis:', error);
       return false;
+    }
+  }
+
+  /**
+   * Busca un usuario por email y retorna su UID
+   */
+  static async getUserByEmail(email: string): Promise<string | null> {
+    try {
+      const q = query(
+        collection(db, this.USERS_COLLECTION),
+        where('email', '==', email)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].id;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error al buscar usuario por email:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Añade análisis adicionales al usuario (compra) - acepta UID o email
+   */
+  static async addCVAnalyses(userIdOrEmail: string, amount: number): Promise<void> {
+    try {
+      let uid = userIdOrEmail;
+      
+      // Si parece ser un email, buscar el UID
+      if (userIdOrEmail.includes('@')) {
+        const foundUid = await this.getUserByEmail(userIdOrEmail);
+        if (!foundUid) {
+          throw new Error(`Usuario con email ${userIdOrEmail} no encontrado`);
+        }
+        uid = foundUid;
+      }
+      
+      const stats = await this.getUserStats(uid);
+      
+      await this.updateUserStats(uid, {
+        cvAnalyzesTotal: stats.cvAnalyzesTotal + amount,
+      });
+      
+      console.log(`✅ Añadidos ${amount} análisis al usuario ${userIdOrEmail}`);
+    } catch (error) {
+      console.error('Error al añadir análisis adicionales:', error);
+      throw error;
     }
   }
 }

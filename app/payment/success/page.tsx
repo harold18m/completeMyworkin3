@@ -1,24 +1,55 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { cvReviewService } from '@/services/cvReviewService';
-import { mercadoPagoService } from '@/services/mercadoPagoService';
-import { CheckCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { CheckCircle } from 'lucide-react';
 
-export default function PaymentSuccessPage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [paymentProcessed, setPaymentProcessed] = useState(false);
-  const searchParams = useSearchParams();
+export default function PaymentSuccess() {
   const router = useRouter();
-  const { user } = useAuth();
 
   useEffect(() => {
-    const processPayment = async () => {
+    // Redirigir después de 3 segundos
+    const timer = setTimeout(() => {
+      router.push('/analizar-cv');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+        <div className="mb-6">
+          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">¡Pago Exitoso!</h1>
+          <p className="text-gray-600">
+            Tu pago se ha procesado correctamente. Las revisiones de CV se han agregado a tu cuenta.
+          </p>
+        </div>
+        
+        <div className="space-y-4">
+          <button
+            onClick={() => router.push('/analizar-cv')}
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors"
+          >
+            Analizar mi CV
+          </button>
+          
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-colors"
+          >
+            Ir al Dashboard
+          </button>
+        </div>
+        
+        <p className="text-sm text-gray-500 mt-4">
+          Serás redirigido automáticamente en 3 segundos...
+        </p>
+      </div>
+    </div>
+  );
+}
       try {
         const paymentId = searchParams.get('payment_id');
         const externalReference = searchParams.get('external_reference');

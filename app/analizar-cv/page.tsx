@@ -1,21 +1,28 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { analyzeCV, uploadCV } from '../../src/utils/cvAnalyzer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Upload, FileText, Crown, AlertCircle } from 'lucide-react';
-import Navbar from '@/components/navbar';
-import { useAuth } from '../../hooks/useAuth';
-import { cvReviewService, CV_PACKAGES } from '../../services/cvReviewService';
-import CVPricingModal from '../../components/CVPricingModal';
-import { mercadoPagoService } from '../../services/mercadoPagoService';
+import React, { useState, useEffect } from "react";
+import { analyzeCV, uploadCV } from "../../src/utils/cvAnalyzer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, Upload, FileText, Crown, AlertCircle } from "lucide-react";
+import Navbar from "@/components/navbar";
+import { useAuth } from "../../hooks/useAuth";
+import { cvReviewService, CV_PACKAGES } from "../../services/cvReviewService";
+import CVPricingModal from "../../components/CVPricingModal";
+import CVPaymentModal from "../../components/CVPaymentModal";
+import { mercadoPagoService } from "../../services/mercadoPagoService";
 
 export default function AnalizarCVPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [puestoPostular, setPuestoPostular] = useState('');
+  const [puestoPostular, setPuestoPostular] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
@@ -23,18 +30,18 @@ export default function AnalizarCVPage() {
   const { user } = useAuth();
   const [freeUsed, setFreeUsed] = useState(false);
   const [longWait, setLongWait] = useState(false);
-  const [veryLongWait, setVeryLongWait] = useState(false);
-    // Nuevos estados para el sistema persistente
+  const [veryLongWait, setVeryLongWait] = useState(false); // Nuevos estados para el sistema persistente
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [userStats, setUserStats] = useState({
     totalReviews: 0,
     remainingReviews: 0, // Simulamos que no tiene revisiones disponibles
     freeReviewUsed: true, // Simulamos que ya usó la revisión gratuita
-    lastReviewDate: undefined as Date | undefined
+    lastReviewDate: undefined as Date | undefined,
   });
-  const [reviewPermission, setReviewPermission] = useState({ 
-    canReview: false, 
-    reason: 'no_reviews_remaining' // Simulamos que no puede revisar
+  const [reviewPermission, setReviewPermission] = useState({
+    canReview: false,
+    reason: "no_reviews_remaining", // Simulamos que no puede revisar
   });
   const [reviewId, setReviewId] = useState<string | null>(null);
 
@@ -42,34 +49,34 @@ export default function AnalizarCVPage() {
     if (user) {
       loadUserData();
     } else {
-      const used = localStorage.getItem('cv_analysis_used');
-      setFreeUsed(used === 'true');
+      const used = localStorage.getItem("cv_analysis_used");
+      setFreeUsed(used === "true");
     }
   }, [user]);
   const loadUserData = async () => {
     if (!user) return;
-    
+
     try {
       // Simulación: Usuario ya usó su revisión gratuita y no tiene revisiones premium
       const simulatedStats = {
         totalReviews: 1,
         remainingReviews: 0, // No tiene revisiones disponibles
         freeReviewUsed: true, // Ya usó la gratuita
-        lastReviewDate: new Date()
+        lastReviewDate: new Date(),
       };
-      
+
       const simulatedPermission = {
         canReview: false,
-        reason: 'no_reviews_remaining'
+        reason: "no_reviews_remaining",
       };
-      
+
       setUserStats(simulatedStats);
       setReviewPermission(simulatedPermission);
       setFreeUsed(true);
-      
-      console.log('Usuario simulado sin revisiones disponibles');
+
+      console.log("Usuario simulado sin revisiones disponibles");
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
     }
   };
 
@@ -105,14 +112,14 @@ export default function AnalizarCVPage() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.type === 'application/pdf') {
+      if (droppedFile.type === "application/pdf") {
         setFile(droppedFile);
         setError(null);
       } else {
-        setError('Por favor, sube un archivo PDF');
+        setError("Por favor, sube un archivo PDF");
       }
     }
   };
@@ -120,64 +127,68 @@ export default function AnalizarCVPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.type === 'application/pdf') {
+      if (selectedFile.type === "application/pdf") {
         setFile(selectedFile);
         setError(null);
       } else {
-        setError('Por favor, sube un archivo PDF');
+        setError("Por favor, sube un archivo PDF");
       }
     }
   };
 
   const handleAnalyze = async () => {
     if (!file) {
-      setError('Por favor, sube un archivo PDF');
+      setError("Por favor, sube un archivo PDF");
       return;
     }
     if (!puestoPostular) {
-      setError('Por favor, ingresa el puesto al que postulas');
+      setError("Por favor, ingresa el puesto al que postulas");
       return;
     }
-    
+
     // Si no hay usuario y ya usó el análisis gratuito, mostrar error
     if (!user && freeUsed) {
-      setError('Has usado tu análisis gratuito. Inicia sesión para analizar más CVs.');
+      setError(
+        "Has usado tu análisis gratuito. Inicia sesión para analizar más CVs."
+      );
       return;
-    }    // Para usuarios autenticados, verificar si pueden hacer revisión
+    } // Para usuarios autenticados, verificar si pueden hacer revisión
     if (user) {
       if (!reviewPermission.canReview && userStats.remainingReviews === 0) {
-        setShowPricingModal(true);
+        setShowPaymentModal(true);
         return;
       }
     }
-      setLoading(true);
+    setLoading(true);
     setError(null);
     setResult(null);
     setLongWait(false);
     setVeryLongWait(false);
-      try {
+    try {
       // Simulación de análisis de CV exitoso
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Simular tiempo de procesamiento
-      
-      const mockResult = "https://drive.google.com/file/d/1ABC123_SIMULADO_CV_ANALISIS/view";
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Simular tiempo de procesamiento
+
+      const mockResult =
+        "https://drive.google.com/file/d/1ABC123_SIMULADO_CV_ANALISIS/view";
       setResult(mockResult);
-      
+
       // Consumir una revisión del usuario
       if (user && userStats.remainingReviews > 0) {
-        setUserStats(prev => ({
+        setUserStats((prev) => ({
           ...prev,
           remainingReviews: prev.remainingReviews - 1,
-          totalReviews: prev.totalReviews + 1
+          totalReviews: prev.totalReviews + 1,
         }));
       }
-      
+
       // Marcar como usado solo después de un análisis exitoso para usuarios no logueados
       if (!user) {
         setFreeUsed(true);
-        localStorage.setItem('cv_analysis_used', 'true');
+        localStorage.setItem("cv_analysis_used", "true");
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Error al analizar el CV';
+      const errorMsg =
+        error instanceof Error ? error.message : "Error al analizar el CV";
       setError(errorMsg);
     } finally {
       setLoading(false);
@@ -186,59 +197,63 @@ export default function AnalizarCVPage() {
 
   const handlePurchaseSuccess = async (purchaseData: any) => {
     if (!user) return;
-    
+
     try {
       // Agregar las revisiones compradas al usuario
       await cvReviewService.addPurchasedReviews(user, purchaseData);
-      
+
       // Recargar datos del usuario
       await loadUserData();
-      
+
       // Cerrar modal
       setShowPricingModal(false);
-      
+
       // Mostrar mensaje de éxito
       setError(null);
     } catch (error) {
-      console.error('Error processing purchase:', error);
-      setError('Error al procesar la compra. Por favor, contacta soporte.');
+      console.error("Error processing purchase:", error);
+      setError("Error al procesar la compra. Por favor, contacta soporte.");
     }
   };
   const handleSelectPackage = async (packageId: string) => {
     if (!user) {
-      setError('Debes iniciar sesión para comprar un paquete');
+      setError("Debes iniciar sesión para comprar un paquete");
       return;
     }
 
     try {
       // Simulación de compra exitosa
-      const selectedPackage = CV_PACKAGES.find(pkg => pkg.id === packageId);
+      const selectedPackage = CV_PACKAGES.find((pkg) => pkg.id === packageId);
       if (!selectedPackage) {
-        throw new Error('Paquete no encontrado');
+        throw new Error("Paquete no encontrado");
       }
 
-      console.log('Simulando compra exitosa del paquete:', selectedPackage.name);
-      
+      console.log(
+        "Simulando compra exitosa del paquete:",
+        selectedPackage.name
+      );
+
       // Simular actualización de estado del usuario
-      setUserStats(prev => ({
+      setUserStats((prev) => ({
         ...prev,
         remainingReviews: selectedPackage.reviews,
       }));
-      
+
       setReviewPermission({
         canReview: true,
-        reason: ''
+        reason: "",
       });
-      
+
       setShowPricingModal(false);
       setError(null);
-      
+
       // Mostrar mensaje de éxito
-      alert(`¡Compra exitosa! Ahora tienes ${selectedPackage.reviews} revisiones de CV disponibles.`);
-      
+      alert(
+        `¡Compra exitosa! Ahora tienes ${selectedPackage.reviews} revisiones de CV disponibles.`
+      );
     } catch (error) {
-      console.error('Error creating payment:', error);
-      setError('Error al procesar la compra. Por favor, intenta nuevamente.');
+      console.error("Error creating payment:", error);
+      setError("Error al procesar la compra. Por favor, intenta nuevamente.");
     }
   };
 
@@ -248,67 +263,59 @@ export default function AnalizarCVPage() {
       <div className="h-[52px]"></div>
       <section className="py-12 px-4">
         <div className="container mx-auto max-w-2xl">
-          <div className="bg-white rounded-2xl p-8 shadow-xl">            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900">
-              Analiza tu CV con <span className="text-[#028bbf]">Inteligencia Artificial</span>
+          <div className="bg-white rounded-2xl p-8 shadow-xl">
+            {" "}
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center text-gray-900">
+              Analiza tu CV con{" "}
+              <span className="text-[#028bbf]">Inteligencia Artificial</span>
             </h1>
             <p className="text-lg text-gray-600 mb-8 text-center">
-              Sube tu CV en PDF y recibe feedback instantáneo para el puesto que deseas.
+              Sube tu CV en PDF y recibe feedback instantáneo para el puesto que
+              deseas.
             </p>
-            
-            {/* Banner de demostración */}
-            <div className="mb-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold">🚀 Demo del Sistema Premium</h3>
-                  <p className="text-sm opacity-90">Prueba el flujo completo de análisis premium con simulación de MercadoPago</p>
-                </div>
-                <Button
-                  onClick={() => {
-                    // Simular que el usuario no tiene revisiones
-                    setUserStats(prev => ({ ...prev, remainingReviews: 0 }));
-                    setReviewPermission({ canReview: false, reason: 'no_reviews_remaining' });
-                  }}
-                  className="bg-white text-purple-600 hover:bg-purple-50"
-                >
-                  Activar Demo
-                </Button>
-              </div>
-            </div>
-            
-            {/* Información para usuarios autenticados */}
-            {user && (
-              <Alert className="mb-6 border-blue-200 bg-blue-50">
-                <Crown className="h-4 w-4 text-blue-600" />
-                <AlertTitle className="text-blue-800">Estado de tu cuenta</AlertTitle>
-                <AlertDescription className="text-blue-700">
-                  <div className="space-y-1">
-                    <p>Revisiones realizadas: {userStats.totalReviews}</p>
-                    <p>Revisiones disponibles: {userStats.remainingReviews}</p>
-                    {userStats.freeReviewUsed && (
-                      <p className="text-sm text-blue-600">✓ Revisión gratuita utilizada</p>
-                    )}
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {/* Alerta para usuarios no logueados que ya usaron su análisis gratuito */}
-            {!user && freeUsed && (
-              <Alert className="mb-6 border-amber-200 bg-amber-50">
-                <AlertCircle className="h-4 w-4 text-amber-600" />
-                <AlertTitle className="text-amber-800">Análisis gratuito utilizado</AlertTitle>
-                <AlertDescription className="text-amber-700">
-                  Ya usaste tu análisis gratuito. Crea una cuenta para acceder a análisis ilimitados y muchas funciones más.
-                </AlertDescription>
-              </Alert>
-            )}
-            
             <Card className="shadow-none border-0">
               <CardContent>
                 <div className="space-y-6">
+                  {/* Información para usuarios autenticados */}
+                  {user && (
+                    <Alert className="mb-6 border-blue-200 bg-blue-50">
+                      <Crown className="h-4 w-4 text-blue-600" />
+                      <AlertTitle className="text-blue-800">
+                        Estado de tu cuenta
+                      </AlertTitle>
+                      <AlertDescription className="text-blue-700">
+                        <div className="space-y-1">
+                          <p>Revisiones realizadas: {userStats.totalReviews}</p>
+                          <p>
+                            Revisiones disponibles: {userStats.remainingReviews}
+                          </p>
+                          {userStats.freeReviewUsed && (
+                            <p className="text-sm text-blue-600">
+                              ✓ Revisión gratuita utilizada
+                            </p>
+                          )}
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {/* Alerta para usuarios no logueados que ya usaron su análisis gratuito */}
+                  {!user && freeUsed && (
+                    <Alert className="mb-6 border-amber-200 bg-amber-50">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      <AlertTitle className="text-amber-800">
+                        Análisis gratuito utilizado
+                      </AlertTitle>
+                      <AlertDescription className="text-amber-700">
+                        Ya usaste tu análisis gratuito. Crea una cuenta para
+                        acceder a análisis ilimitados y muchas funciones más.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                   <div
                     className={`border-2 border-dashed rounded-lg p-8 text-center ${
-                      dragActive ? 'border-primary bg-primary/10' : 'border-gray-300'
+                      dragActive
+                        ? "border-primary bg-primary/10"
+                        : "border-gray-300"
                     }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
@@ -328,7 +335,9 @@ export default function AnalizarCVPage() {
                     >
                       <Upload className="h-12 w-12 text-gray-400 mb-4" />
                       <span className="text-sm text-gray-600">
-                        {file ? file.name : 'Arrastra tu CV aquí o haz clic para seleccionar'}
+                        {file
+                          ? file.name
+                          : "Arrastra tu CV aquí o haz clic para seleccionar"}
                       </span>
                       <span className="text-xs text-gray-500 mt-2">
                         Solo se aceptan archivos PDF
@@ -358,12 +367,21 @@ export default function AnalizarCVPage() {
                       <AlertDescription>
                         <div className="flex flex-col gap-2 items-center">
                           <Loader2 className="h-8 w-8 animate-spin text-[#028bbf] mb-2" />
-                          <span>Estamos analizando tu CV. Esto puede demorar hasta 2 minutos.</span>
+                          <span>
+                            Estamos analizando tu CV. Esto puede demorar hasta 2
+                            minutos.
+                          </span>
                           {longWait && !veryLongWait && (
-                            <span className="text-sm text-gray-500">Sigue esperando, esto puede demorar un poco más de lo normal...</span>
+                            <span className="text-sm text-gray-500">
+                              Sigue esperando, esto puede demorar un poco más de
+                              lo normal...
+                            </span>
                           )}
                           {veryLongWait && (
-                            <span className="text-sm text-red-500">El análisis está tardando demasiado. Puedes intentarlo más tarde o revisar tu conexión.</span>
+                            <span className="text-sm text-red-500">
+                              El análisis está tardando demasiado. Puedes
+                              intentarlo más tarde o revisar tu conexión.
+                            </span>
                           )}
                         </div>
                       </AlertDescription>
@@ -374,7 +392,10 @@ export default function AnalizarCVPage() {
                       <AlertTitle>¡Análisis completado!</AlertTitle>
                       <AlertDescription>
                         <div className="flex flex-col items-center gap-2 mt-2">
-                          <p>Tu CV ha sido analizado correctamente. Puedes ver el resultado en el siguiente enlace:</p>
+                          <p>
+                            Tu CV ha sido analizado correctamente. Puedes ver el
+                            resultado en el siguiente enlace:
+                          </p>
                           <a
                             href={result}
                             target="_blank"
@@ -387,7 +408,8 @@ export default function AnalizarCVPage() {
                         </div>
                       </AlertDescription>
                     </Alert>
-                  )}                  <Button
+                  )}{" "}
+                  <Button
                     onClick={handleAnalyze}
                     disabled={loading || !file || !puestoPostular}
                     className="w-full"
@@ -404,19 +426,22 @@ export default function AnalizarCVPage() {
                       </>
                     )}
                   </Button>
-                  
-                  {/* Botón para simular compra cuando no hay revisiones */}
+                  {/* Botón para compra cuando no hay revisiones */}
                   {user && userStats.remainingReviews === 0 && (
-                    <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <p className="text-amber-800 text-sm mb-3">
-                        ⚠️ No tienes revisiones disponibles. ¡Obtén más revisiones para analizar tu CV!
+                    <div className="mt-4 p-4 bg-gradient-to-r from-[#028bbf]/10 to-[#0369a1]/10 border border-[#028bbf]/20 rounded-lg">
+                      <p className="text-[#028bbf] text-sm mb-3 font-medium">
+                        💎 ¡Desbloquea análisis premium de CV!
+                      </p>
+                      <p className="text-gray-600 text-xs mb-3">
+                        Obtén análisis detallados con recomendaciones
+                        personalizadas de IA
                       </p>
                       <Button
-                        onClick={() => setShowPricingModal(true)}
-                        className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                        onClick={() => setShowPaymentModal(true)}
+                        className="w-full bg-gradient-to-r from-[#028bbf] to-[#0369a1] hover:from-[#027ba8] hover:to-[#1e40af]"
                       >
                         <Crown className="mr-2 h-4 w-4" />
-                        Obtener Revisiones Premium
+                        Ver Planes de Análisis
                       </Button>
                     </div>
                   )}
@@ -426,7 +451,6 @@ export default function AnalizarCVPage() {
           </div>
         </div>
       </section>
-      
       {/* Modal de precios */}
       {showPricingModal && (
         <CVPricingModal
@@ -435,6 +459,16 @@ export default function AnalizarCVPage() {
           onSelectPackage={handleSelectPackage}
           userEmail={user?.email ?? undefined}
           loading={loading}
+        />
+      )}
+
+      {/* Modal de pago con MercadoPago */}
+      {showPaymentModal && (
+        <CVPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          userEmail={user?.email ?? undefined}
+          userName={user?.displayName ?? user?.email ?? undefined}
         />
       )}
     </div>

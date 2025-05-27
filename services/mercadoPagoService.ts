@@ -1,8 +1,8 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { UserService } from './userService';
 
-// Configuración de MercadoPago
-const MP_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MP_ACCESS_TOKEN || '';
+// Configuración de MercadoPago - CORREGIDO: MP_ACCESS_TOKEN debe ser privado
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || '';
 const MP_PUBLIC_KEY = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY || '';
 
 // Configurar cliente de MercadoPago

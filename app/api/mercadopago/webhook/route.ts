@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cvReviewService } from '@/services/cvReviewService';
+import { UserService } from '@/services/userService';
 
-const MERCADOPAGO_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 
 export async function POST(request: NextRequest) {
   try {
-    if (!MERCADOPAGO_ACCESS_TOKEN) {
+    if (!MP_ACCESS_TOKEN) {
       console.error('MercadoPago access token no configurado');
       return NextResponse.json({ error: 'Configuración incorrecta' }, { status: 500 });
     }
 
     const body = await request.json();
-    console.log('Webhook received:', body);
+    console.log('🔔 Webhook recibido:', body);
 
-    // MercadoPago envía diferentes tipos de notificaciones
     if (body.type === 'payment') {
       const paymentId = body.data.id;
       
@@ -21,7 +20,7 @@ export async function POST(request: NextRequest) {
       const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${MERCADOPAGO_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
           'Content-Type': 'application/json',
         }
       });
@@ -31,33 +30,34 @@ export async function POST(request: NextRequest) {
       }
 
       const paymentData = await response.json();
-      console.log('Payment data:', paymentData);
+      console.log('💳 Datos del pago:', paymentData);
 
-      // Si el pago fue aprobado, actualizar el usuario
+      // Si el pago fue aprobado, actualizar Firebase usando UserService
       if (paymentData.status === 'approved') {
         try {
-          const externalReference = JSON.parse(paymentData.external_reference || '{}');
-          const { userId, packageId } = externalReference;
-
-          if (userId && packageId) {
-            // Aquí necesitarías obtener el objeto User de Firebase
-            // Para simplificar, podrías almacenar la información de la compra
-            // y procesarla cuando el usuario inicie sesión nuevamente
+          const externalReference = paymentData.external_reference || '';
+          const [userEmail, revisions] = externalReference.split('-');
+          
+          if (userEmail && revisions) {
+            // Buscar el UID del usuario por email (necesitarás agregar esta función al UserService)
+            // Por ahora, asumiendo que tienes el UID en el external_reference
+            const revisionsToAdd = parseInt(revisions);
             
-            console.log(`Payment approved for user ${userId}, package ${packageId}`);
+            // Usar UserService para añadir las revisiones
+            await UserService.addCVAnalyses(userEmail, revisionsToAdd);
             
-            // Podrías crear un registro temporal de compras aprobadas
-            // que se procese cuando el usuario inicie sesión
+            console.log(`✅ Usuario ${userEmail} actualizado: +${revisionsToAdd} análisis de CV`);
           }
+          
         } catch (error) {
-          console.error('Error processing approved payment:', error);
+          console.error('❌ Error procesando pago aprobado:', error);
         }
       }
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error('❌ Error procesando webhook:', error);
     return NextResponse.json(
       { error: 'Error al procesar webhook' },
       { status: 500 }
