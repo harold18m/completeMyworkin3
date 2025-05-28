@@ -3,3 +3,13 @@ node_modules/
 .next/
 .env
 .env.local
+.env.production
+
+# Firebase credentials
+*firebase-adminsdk*.json
+serviceAccountKey.json
+firebase-service-account.json
+
+# Other sensitive files
+*.pem
+*.key

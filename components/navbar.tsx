@@ -13,10 +13,15 @@ import {
 } from "@/components/ui/navigation-menu"
 import { useAuth } from "../hooks/useAuth";
 import LoginModal from "./LoginModal";
+import Avatar from "./Avatar";
+import UserProfile from "./UserProfile";
+import StudentDashboard from "./StudentDashboard";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const { user, logout } = useAuth();
 
   return (
@@ -81,19 +86,33 @@ export default function Navbar() {
             </a>
             {/* Botón de login/logout */}
             {user ? (
-              <button
-                onClick={logout}
-                className="hidden md:flex items-center justify-center gap-2 py-1.5 px-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full font-medium shadow-md transition-all text-sm"
-              >
-                Cerrar sesión
-              </button>
+              <div className="hidden md:flex items-center gap-3">
+                {/* Dashboard Button */}
+                <Link
+                  href="/dashboard"
+                  className="flex items-center justify-center gap-2 py-1.5 px-3 bg-blue-100 hover:bg-blue-200 text-[#028bbf] rounded-full font-medium shadow-md transition-all text-sm"
+                >
+                  Panel
+                </Link>
+                
+                {/* User Avatar and Profile */}
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 hover:bg-gray-100 rounded-full p-1 transition-colors"
+                >
+                  <Avatar user={user} size="sm" />
+                  <span className="text-sm font-medium text-gray-700 max-w-20 truncate">
+                    {user.displayName || user.email?.split('@')[0] || 'Usuario'}
+                  </span>
+                </Link>
+              </div>
             ) : (
-              <button
-                onClick={() => setLoginOpen(true)}
+              <Link
+                href="/login"
                 className="hidden md:flex items-center justify-center gap-2 py-1.5 px-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full font-medium shadow-md transition-all text-sm"
               >
                 Iniciar sesión
-              </button>
+              </Link>
             )}
           </div>
           {/* Botón de menú hamburguesa (visible solo en móvil) */}
@@ -161,10 +180,55 @@ export default function Navbar() {
                 </svg>
                 <span>Chatea con Worky</span>
               </a>
+              
+              {/* Opciones de usuario para móvil */}
+              {user ? (
+                <div className="pt-4 border-t border-gray-200 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar user={user} size="sm" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {user.displayName || user.email?.split('@')[0] || 'Usuario'}
+                    </span>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full text-left text-gray-700 hover:text-[#028bbf] transition-colors text-sm font-medium"
+                  >
+                    Mi Panel
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full text-left text-gray-700 hover:text-[#028bbf] transition-colors text-sm font-medium"
+                  >
+                    Mi Perfil
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="block w-full text-left text-red-600 hover:text-red-700 transition-colors text-sm font-medium"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block w-full text-left text-[#028bbf] hover:text-[#027ba8] transition-colors text-sm font-medium pt-4 border-t border-gray-200"
+                >
+                  Iniciar sesión
+                </Link>
+              )}
             </nav>
           </div>
         )}
         <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+        <UserProfile isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
+        <StudentDashboard isOpen={dashboardOpen} onClose={() => setDashboardOpen(false)} />
       </div>
     </header>
   );

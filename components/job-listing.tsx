@@ -1,20 +1,24 @@
 'use client';
 
-import { useState } from 'react';
 import { Practice } from '@/services/firebase';
-import ApplyModal from './apply-modal';
 import { trackApplicationStart } from '@/utils/analytics';
+import { useRouter } from 'next/navigation';
 
 interface JobListingProps {
   practice: Practice;
 }
 
 export default function JobListing({ practice }: JobListingProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const handleApply = () => {
     trackApplicationStart(practice.title);
-    window.open(practice.url, '_blank');
+    const params = new URLSearchParams({
+      title: practice.title,
+      url: practice.link || practice.url || '',
+      worky: 'https://mc.ht/s/SH1lIgc'
+    });
+    router.push(`/postular?${params.toString()}`);
   };
 
   // Formatear la fecha de finalización si existe
@@ -107,10 +111,7 @@ export default function JobListing({ practice }: JobListingProps) {
       {/* Nuevo botón de Aplicar */}
       <div className="flex justify-center w-full">
         <button 
-          onClick={() => {
-            setIsModalOpen(true);
-            trackApplicationStart(practice.title);
-          }}
+          onClick={handleApply}
           className="w-full mt-3 bg-[#028bbf] text-white px-6 py-2 rounded-lg font-medium text-sm hover:bg-[#027ba8] transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,16 +120,6 @@ export default function JobListing({ practice }: JobListingProps) {
           Aplicar ahora
         </button>
       </div>
-
-      {/* Modal de aplicación */}
-      <ApplyModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onApply={handleApply}
-        workyUrl="https://mc.ht/s/SH1lIgc"
-        jobTitle={practice.title}
-        jobUrl={practice.link} 
-      />
     </div>
   )
 }

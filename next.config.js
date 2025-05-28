@@ -5,6 +5,15 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+  webpack: (config, { isServer }) => {
+    // Para Firebase Admin SDK
+    if (isServer) {
+      config.externals.push({
+        'firebase-admin': 'commonjs firebase-admin',
+      });
+    }
+    return config;
+  },
   async rewrites() {
     return [
       {
